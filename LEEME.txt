@@ -1,0 +1,199 @@
+TALLER LA CARPINTERÍA — LANDING PREMIUM + COTIZADOR ONLINE
+
+ARCHIVOS
+- index.html
+- styles.css
+- script.js
+- assets/logo.jpg
+- assets/antes.jpeg
+- assets/despues.jpeg
+
+NUEVO: COTIZADOR ESTIMADO ONLINE
+- Cocina Integral: $180.000 CLP / m²
+- Clóset / Walk-in Closet: $140.000 CLP / m²
+- Centro de TV / Living: $120.000 CLP / m²
+- Mobiliario Comercial / Oficina: $130.000 CLP / m²
+- Material Estándar: 1.0x
+- Material Premium: 1.25x
+- Material Alta Gama: 1.55x
+- Rango mostrado: -10% / +10%
+- WhatsApp: +56 9 8808 5830
+- Cálculo: largo × alto × precio base × multiplicador
+- Mensaje de WhatsApp generado automáticamente con la estimación.
+
+IMPORTANTE
+El valor mostrado es referencial. La web informa expresamente que la cotización final
+se confirma tras visita técnica y diseño 3D.
+
+SE MANTIENE
+- Diseño responsive Mobile First
+- Galería filtrable
+- Comparador Antes/Después
+- FAQ interactiva
+- Formulario de precotización en 3 pasos
+- Botón flotante y barra móvil de WhatsApp
+- Animaciones IntersectionObserver
+
+DATOS A CONFIRMAR ANTES DE PUBLICAR
+- Correo real
+- Dirección / ubicación
+- Horario
+- Servicios definitivos
+- Reseñas reales del cliente
+
+CAMBIOS EN ESTA VERSIÓN (v2)
+- Hero: foto de un proyecto real (cocina terminada) en vez del retrato del fundador.
+- Nueva sección "Sobre nosotros" con la foto y bio del fundador (assets/fotos-reales/fundador.jpg).
+- Galería: reemplazadas las fotos de stock por 3 fotos reales de proyectos (2 cocinas + 1 closet).
+- Comparador Antes/Después: reemplazado por el par de fotos que sí coinciden en ángulo
+  (assets/fotos-reales/antes-1.jpeg y despues-1.jpeg).
+- Nueva sección "Cómo trabajamos" (proceso en 5 pasos) antes del cotizador.
+- Nueva sección de Preguntas Frecuentes (acordeón nativo, sin JS adicional).
+- Nav y menú móvil actualizados con los enlaces a "Nosotros" y "Preguntas frecuentes".
+- Texto de la franja de garantías ajustado a "Garantía por escrito" (antes "Garantía de satisfacción").
+- Los assets antiguos de stock (assets/galeria, assets/hero, assets/comparador, assets/nosotros)
+  quedaron sin usar en el HTML; se pueden borrar cuando se confirme que ya no se necesitan.
+
+PENDIENTE (sigue igual que en v1)
+- Los 3 testimonios de la sección de reseñas son de marcador de posición, no reales:
+  reemplazar por reseñas reales del cliente antes de publicar.
+- Política de privacidad y términos de servicio siguen "pendiente" en el footer.
+- Faltan fotos reales de proyectos de Living/TV y Oficina/comercial para la galería
+  (el cotizador ya ofrece esas categorías, pero aún no hay ejemplos visuales).
+
+CAMBIOS EN ESTA VERSIÓN (v3): CONFIGURADOR 3D DE MUEBLES
+- Nueva sección "Diseña tu mueble en 3D" (id #configurador), entre "Cómo trabajamos" y el Cotizador.
+- Visualizador 3D real hecho con Three.js (assets/configurator.js). Three.js y OrbitControls
+  están vendorizados localmente en assets/vendor/three.min.js y assets/vendor/OrbitControls.js
+  (mismo patrón que assets/vendor/kitchen-viewer.bundle.js) y se cargan como <script> clásicos,
+  NO como módulos ES — así funciona igual abriendo index.html a doble clic (file://) que en un
+  servidor real. La geometría del mueble (paneles, repisas, cajones y puertas) es 100% generada
+  en el navegador; no usa los modelos .glb de assets/models ni depende del visor 3D de cocina
+  que ya existía dentro del cotizador (ese se mantiene igual, sin tocarlo).
+- Controles en tiempo real: ancho/alto/profundidad (sliders 60-400 / 60-280 / 30-90 cm),
+  número de repisas (0-6) y de cajones (0-5), distribución interior (abierto / con puertas /
+  con cajones y puertas), color (5 opciones), material (afecta el brillo/textura visual) y
+  unidad de las cotas (cm/mm). Todo se recalcula al instante, sin recargar la página.
+- Cotas dinámicas: líneas de medida con marcas y etiquetas de Ancho, Alto y Profundidad
+  alrededor del mueble, que se reposicionan y reescriben automáticamente al cambiar cualquier
+  parámetro.
+- Botón "Enviar estas medidas al cotizador": traspasa ancho/alto/puertas/cajones configurados
+  al cotizador de precios (como Clóset) y baja hasta esa sección con el rango ya calculado.
+- Iluminación de estudio (hemisferio + luz principal + relleno), sombras suaves (PCFSoftShadowMap)
+  y materiales tipo PBR (MeshStandardMaterial) con tonemapping ACESFilmic para un look moderno.
+- Rendimiento: el visualizador sólo se carga cuando esa sección se acerca a la pantalla
+  (mismo patrón que el visor 3D de cocina), y el render se pausa automáticamente cuando la
+  sección sale de la vista.
+
+REQUISITO PARA VER EL CONFIGURADOR 3D
+- Ya NO requiere servidor ni conexión a internet: Three.js quedó vendorizado localmente en
+  assets/vendor/, así que abriendo index.html a doble clic (file://) el configurador funciona
+  igual que en un hosting real. (En la v3 original se cargaba Three.js como módulo ES desde un
+  CDN con <script type="importmap">, lo que SÍ fallaba con "No fue posible cargar el
+  visualizador 3D" al abrir el archivo directamente — quedó corregido en esta revisión.)
+- No requiere instalar nada ni usar software de diseño externo.
+
+CAMBIOS EN ESTA VERSIÓN (v4): UN SOLO VISUALIZADOR 3D (COCINA + CLOSET)
+- Se eliminó el visor 3D antiguo que vivía dentro del cotizador (el que usaba modelos .glb de
+  lavaplatos/horno/campana y assets/vendor/kitchen-viewer.bundle.js). Esos archivos ya no están
+  en el paquete (se borraron assets/vendor/kitchen-viewer.bundle.js y assets/models/).
+- Ahora hay UN solo diseñador 3D (sección "Diseña tu cocina o tu closet en 3D"), con un selector
+  arriba de los controles para elegir "Cocina" o "Closet". La cocina se dibuja con el mismo motor,
+  materiales, iluminación y sistema de cotas que ya se usaban para el closet (que era el diseño
+  que más gustó), en vez de con el visor anterior.
+- Modo Cocina: muebles inferiores con mesón, muebles superiores opcionales, isla opcional, y
+  cajones bajo el mesón (mismo slider "Cajones", que en este modo se relabels como "Cajones bajo
+  el mesón"). Modo Closet: igual que en la v3 (distribución interior, repisas, cajones).
+- Ancho/Alto/Profundidad, color, material, unidad de las cotas, "Restablecer" y "Enviar estas
+  medidas al cotizador" son compartidos por ambos modos; al cambiar de tipo se aplican medidas
+  por defecto sensatas para ese tipo (se pueden ajustar después con los sliders).
+- El cotizador de precios ahora tiene un botón "Ver en el diseñador 3D" (visible sólo cuando el
+  proyecto elegido es Cocina o Clóset) que abre el diseñador 3D unificado con esas mismas medidas
+  ya cargadas — el puente funciona en ambos sentidos.
+
+CAMBIOS EN ESTA VERSIÓN (v5): COTIZADOR Y DISEÑADOR 3D FUSIONADOS EN UNA SOLA SECCIÓN
+- Las dos secciones separadas ("Pruébalo tú mismo" con el 3D, y "Cotizador online" con el
+  formulario de precio) se fusionaron en UNA sola sección ("Cotiza y visualiza tu proyecto"):
+  a la izquierda la configuración, a la derecha el mismo 3D + la estimación + WhatsApp, todo en
+  el mismo flujo. Ya no existen dos formularios ni un botón "puente" entre ellos — ambos scripts
+  (el 3D y el cálculo de precio) leen los mismos campos del formulario único.
+- El formulario se simplificó a propósito: ya no hay selector de Complejidad ni de Herrajes
+  (se evalúan en la visita técnica), ni 3 niveles de material con 5 colores de cocina — ahora
+  es solo "Terminación: Estándar / Premium", que además define el tono del mueble en el 3D
+  (antes el color se elegía aparte). Tampoco hay "Living" ni "Oficina" en el cotizador: por ahora
+  solo Cocina y Closet, que son los que soporta el visualizador 3D.
+- Cocina: distribución Recta o En L (con "segundo tramo" que sólo aparece si se elige En L),
+  largo principal, y los módulos ahora son una sola elección — Solo Base / Solo Aéreos /
+  Base + Aéreos — en vez de dos casilleros independientes que antes permitían combinaciones
+  ambiguas. Se agregó Cocina en L al visualizador 3D (antes solo existía en el cálculo de
+  precio, no se veía). Se quitó la Isla (no estaba en el alcance pedido) y la profundidad ya
+  no se pide: se usa un valor estándar fijo (60 cm) internamente.
+- Cocina — artefactos referenciales nuevos: Lavaplatos, Horno y Campana ahora sí se ven en el
+  3D (antes los checkboxes existían en el cotizador viejo pero no dibujaban nada, porque
+  apuntaban al visor de cocina que ya se había eliminado en la v4). Se verificó explícitamente
+  que activarlos/desactivarlos cambia el modelo 3D pero NUNCA el valor estimado.
+- Closet: el closet ahora se muestra ABIERTO (sin puertas) porque el objetivo es que se vea la
+  distribución interior; "Interior referencial" son 3 casilleros simples e independientes —
+  Barras para colgar (nuevo, una barra visual), Repisas, Cajoneras — reemplazando el selector
+  de "Distribución interior" y los sliders numéricos de repisas/cajones de la v4. Closet en L
+  NO se implementó: el modelo actual no lo soporta y el cálculo de precios tampoco lo tenía, así
+  que se dejó fuera de esta revisión para no ampliar el alcance sin necesidad.
+- El valor estimado se recalcula con los mismos números que ya se usaban (mismo $/m², mismos
+  multiplicadores de terminación 1x/1.25x, mismo multiplicador de cocina en L 1.08x, mismos
+  niveles de "interior" de closet 1x/1.12x/1.25x según cuántos casilleros estén activos) — el
+  objetivo era simplificar la interfaz, no cambiar los precios.
+- Se corrigió un bug encontrado durante las pruebas: al cambiar entre Cocina y Closet, el precio
+  a veces mostraba un valor con las medidas ANTERIORES (porque el script del precio y el del 3D
+  escuchan el mismo campo por separado, y el del precio alcanzaba a calcular antes de que el 3D
+  terminara de poner los valores por defecto del nuevo tipo). Ya está corregido y verificado.
+- Se eliminó del código: el formulario viejo completo (#budget-calculator con sus 5 fieldsets),
+  el puente bidireccional cotizador↔3D de la v4, y todo el CSS que solo le servía a esos
+  elementos (quedó un styles.css bastante más corto). El motor 3D (render, luces, cámara,
+  OrbitControls, cotas, carga diferida) no se tocó.
+
+CAMBIOS EN ESTA VERSIÓN (v6): BUG DE MEZCLA CORREGIDO, COLOR DE VUELTA, PROPORCIONES DE COCINA
+- BUG CRÍTICO CORREGIDO: los campos exclusivos de Cocina y Closet en realidad NO se estaban
+  ocultando — se veían mezclados. La causa: elementos con el atributo "hidden" y una clase que
+  define "display" (como .fc-group{display:grid}) hacen que el navegador ignore el hidden nativo,
+  porque una regla de autor con la misma especificidad siempre gana sobre el [hidden] por defecto.
+  Se agregó una regla global "[hidden]{display:none!important}" en styles.css que soluciona esto
+  en todo el sitio, no sólo en el cotizador. Se reverificó esta vez con getComputedStyle() (el
+  render real), no sólo con la propiedad .hidden de JS — que era como se había "confirmado" antes
+  sin detectar el problema.
+- Recuperado el selector de "Color de frentes" (Grafito, Madera, Blanco, Borgoña, Azul marino y
+  Arena, nuevo), que se había quitado en la v5 al fusionar Terminación y Color en un solo control.
+  Ahora son independientes: Terminación (Estándar/Premium) sigue afectando sólo el precio y el
+  brillo del material; Color define el tono del mueble en el 3D. Disponible para Cocina y Closet.
+- Recuperada la Profundidad como control visible (slider 45-75 cm, antes fija en 60 cm sin opción
+  para el cliente), compartida por Cocina y Closet.
+- CORREGIDAS las proporciones 3D de la cocina — el problema más importante reportado: los muebles
+  aéreos llegaban a ocupar todo el espacio restante hasta el techo (hasta 1,4 m de alto), por eso
+  se veía como "un closet arriba de otro". Ahora son medidas fijas y realistas: base ~87 cm de
+  alto (91 cm con cubierta), espacio libre de 55 cm entre cubierta y aéreo, aéreo de 70 cm de alto
+  y fondo de 33 cm (antes tenía el mismo fondo que la base). Verificado con las cajas 3D reales:
+  base 91 cm, espacio 55 cm, aéreo 70 cm — dentro de los rangos pedidos.
+- La Campana se reposicionó para integrarse a la línea de los aéreos (canopy + ducto corto), en
+  vez de flotar cerca del techo como antes; sigue viéndose coherente cuando no hay aéreos activos.
+- Ambientación 3D mejorada: se agregó una pared de fondo y una pared lateral (antes sólo había un
+  piso circular con el mueble flotando en el vacío), ambas se reacomodan según el ancho/profundidad
+  configurados. Piso con tono más cálido y distinto de las paredes para dar sensación de espacio.
+  Cámara inicial más cercana y a la altura de una persona, para una vista más "habitada".
+- El resumen de la estimación ahora muestra tags dinámicos (Distribución, Largo, Profundidad,
+  Módulos/Interior, Terminación, Color) arriba del rango de precio, y el mensaje de WhatsApp
+  incluye el color elegido.
+- Estructura de pasos renumerada para separar mejor Cocina y Closet: 1) Tipo, 2) Distribución
+  (sólo Cocina), 3) Medidas principales (compartido), 4) Módulos/Interior, 5) Elementos
+  referenciales (sólo Cocina), 6) Terminación, 7) Color. Closet en L sigue sin implementarse
+  (mismo motivo que en la v5: el modelo no lo soporta y ampliarlo no estaba en el alcance pedido).
+
+CAMBIOS EN ESTA VERSIÓN (v7): HORNO CON APARIENCIA REAL
+- El horno se veía como una simple puerta de otro color (un bloque plano), sin nada que lo
+  distinguiera de un mueble más. Ahora tiene: marco de acero, vidrio oscuro empotrado, panel
+  de control (franja superior) y una manilla horizontal de acero (las puertas de cocina usan
+  manilla vertical, así que el horno se distingue también por eso). Son 4 piezas en vez de 1,
+  todas dentro del mismo espacio que ya ocupaba, sin afectar el precio ni el resto del modelo.
+- CORREGIDO: el módulo del horno se dibujaba ENCIMA de la puerta normal de ese módulo, así que
+  la manilla vertical de esa puerta quedaba asomando junto a la manilla del horno. Ahora el
+  horno ocupa un módulo completo propio (el del medio) y ese módulo ya no dibuja su puerta ni
+  su manilla normal. Verificado con intersección real de cajas 3D (no sólo posición X) en
+  anchos de 120 a 400 cm: cero superposiciones.
