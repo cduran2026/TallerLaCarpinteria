@@ -4,7 +4,14 @@
   // que cargan assets/vendor/three.min.js y assets/vendor/OrbitControls.js antes que este archivo.
   // Así funciona también abriendo index.html directamente (file://), sin depender de un servidor.
   const wrap = document.querySelector("[data-furniture-viewer]");
-  if (wrap) initFurnitureConfigurator(wrap);
+  if (wrap) {
+    try { initFurnitureConfigurator(wrap); }
+    catch (error) {
+      const status = wrap.querySelector("#furniture-loading span:last-child");
+      if (status) status.textContent = "Vista 3D no disponible. Puedes seguir configurando y cotizando tu proyecto.";
+      console.error("No se pudo iniciar el visor 3D", error);
+    }
+  }
 
   function initFurnitureConfigurator(wrap) {
   const canvas = wrap.querySelector("#furniture-canvas");
@@ -12,68 +19,7 @@
   const readout = document.querySelector("#furniture-readout");
 
   const PANEL_THICKNESS = 0.018; // 1.8 cm, in meters
-  const DEFAULT_COLOR = "#333936";
-
-  const els = {
-    type: () => document.querySelector('input[name="fcType"]:checked'),
-    kitchenLayout: () => document.querySelector('input[name="fcKitchenLayout"]:checked'),
-    modules: () => document.querySelector('input[name="fcModules"]:checked'),
-    finish: () => document.querySelector('input[name="fcFinish"]:checked'),
-    color: () => document.querySelector('input[name="fcColor"]:checked'),
-    width: document.querySelector("#fc-width"),
-    widthLabel: document.querySelector("#fc-width-label"),
-    widthOut: document.querySelector("#fc-width-value"),
-    secondLeg: document.querySelector("#fc-second-leg"),
-    secondLegOut: document.querySelector("#fc-second-leg-value"),
-    secondLegGroup: document.querySelector("#fc-second-leg-group"),
-    height: document.querySelector("#fc-height"),
-    heightOut: document.querySelector("#fc-height-value"),
-    depth: document.querySelector("#fc-depth"),
-    depthOut: document.querySelector("#fc-depth-value"),
-    rod: document.querySelector("#fc-rod"),
-    shelves: document.querySelector("#fc-shelves"),
-    drawers: document.querySelector("#fc-drawers"),
-    sink: document.querySelector("#fc-sink"),
-    oven: document.querySelector("#fc-oven"),
-    hood: document.querySelector("#fc-hood"),
-    kitchenLayoutGroup: document.querySelector("#fc-kitchen-layout-group"),
-    closetHeightGroup: document.querySelector("#fc-closet-height-group"),
-    kitchenFields: document.querySelector("#fc-kitchen-fields"),
-    closetFields: document.querySelector("#fc-closet-fields"),
-    appliancesGroup: document.querySelector("#fc-appliances-group"),
-    reset: document.querySelector("#fc-reset"),
-  };
-
-  const SHELF_COUNT = 3;
-  const DRAWER_COUNT = 2;
-
-  // El estado inicial se lee del DOM (no de un literal fijo): así, si algo más de la
-  // página ya dejó cargados tipo/medidas antes de que este script termine de llegar, se respetan.
-  const modulesInit = els.modules()?.value || "ambos";
-  const finishInit = els.finish()?.value || "standard";
-  const state = {
-    type: els.type()?.value || "kitchen",
-    kitchenLayout: els.kitchenLayout()?.value || "straight",
-    width: Number(els.width?.value) || 220,
-    secondLeg: Number(els.secondLeg?.value) || 150,
-    height: Number(els.height?.value) || 240,
-    depth: Number(els.depth?.value) || 60,
-    upper: modulesInit !== "base",
-    lower: modulesInit !== "aereos",
-    rod: els.rod ? els.rod.checked : true,
-    shelves: els.shelves && els.shelves.checked ? SHELF_COUNT : 0,
-    drawers: els.drawers && els.drawers.checked ? DRAWER_COUNT : 0,
-    sink: els.sink ? els.sink.checked : false,
-    oven: els.oven ? els.oven.checked : false,
-    hood: els.hood ? els.hood.checked : false,
-    material: finishInit,
-    color: els.color()?.value || DEFAULT_COLOR,
-    unit: "cm",
-  };
-
-  const KITCHEN_DEFAULTS = { width: 220, depth: 60, kitchenLayout: "straight", secondLeg: 150, upper: true, lower: true, sink: false, oven: false, hood: false };
-  const CLOSET_DEFAULTS = { width: 200, height: 240, depth: 60, rod: true, shelves: SHELF_COUNT, drawers: 0 };
-
+  const state = window.TALLER_CONFIGURATION.getState();
   // ---- Renderer / scene / camera ----------------------------------------
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
@@ -161,11 +107,14 @@
 
   // ---- Helpers --------------------------------------------------------------
   function disposeGroup(group) {
+    const disposedMaterials = new Set();
     group.traverse((obj) => {
       if (obj.geometry) obj.geometry.dispose();
       if (obj.material) {
         const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
         mats.forEach((mat) => {
+          if (sharedMaterials.has(mat) || disposedMaterials.has(mat)) return;
+          disposedMaterials.add(mat);
           if (mat.map) mat.map.dispose();
           mat.dispose();
         });
@@ -192,6 +141,8 @@
   const ovenGlassMaterial = new THREE.MeshStandardMaterial({ color: 0x0c0c0e, roughness: 0.16, metalness: 0.45 });
   const ovenHandleMaterial = new THREE.MeshStandardMaterial({ color: 0xdadcde, roughness: 0.25, metalness: 0.82 });
   const hoodMaterial = new THREE.MeshStandardMaterial({ color: 0x9aa0a6, roughness: 0.3, metalness: 0.7 });
+
+  const sharedMaterials = new Set([interiorMaterial, handleMaterial, counterMaterial, toeKickMaterial, sinkMaterial, ovenFrameMaterial, ovenGlassMaterial, ovenHandleMaterial, hoodMaterial]);
 
   function addBox(group, mat, sx, sy, sz, px, py, pz, { shadow = true, receive = true } = {}) {
     const mesh = new THREE.Mesh(new THREE.BoxGeometry(Math.max(sx, 0.001), Math.max(sy, 0.001), Math.max(sz, 0.001)), mat);
@@ -268,8 +219,19 @@
 
   // ---- Cocina: muebles inferiores + mesón, superiores opcionales, en L y artefactos ------
   function buildKitchen() {
-    const w = state.width / 100;
-    const hTotal = 2.4; // altura estándar de cocina, no configurable
+    const main = new THREE.Group();
+    furnitureGroup.add(main);
+    buildKitchenRun(main, state.width / 100, true);
+    if (state.kitchenLayout === "l") {
+      const leg = new THREE.Group();
+      furnitureGroup.add(leg);
+      buildKitchenRun(leg, state.secondLeg / 100, false);
+      leg.rotation.y = -Math.PI / 2;
+      leg.position.set((state.width - state.depth) / 200, 0, (state.depth + state.secondLeg) / 200);
+    }
+  }
+
+  function buildKitchenRun(group, w, appliances) {
     const d = state.depth / 100;
     const T = PANEL_THICKNESS;
     const panelMat = makePanelMaterial();
@@ -288,16 +250,16 @@
     const moduleW = w / numModules;
 
     if (state.lower) {
-      addBox(furnitureGroup, panelMat, T, baseH, d, -w / 2 + T / 2, baseH / 2, 0);
-      addBox(furnitureGroup, panelMat, T, baseH, d, w / 2 - T / 2, baseH / 2, 0);
-      addBox(furnitureGroup, panelMat, w - 2 * T, T, d, 0, T / 2, 0);
-      addBox(furnitureGroup, panelMat, w - 2 * T, baseH - 2 * T, T, 0, baseH / 2, -d / 2 + T / 2);
-      addBox(furnitureGroup, toeKickMaterial, w - 2 * T, 0.09, T, 0, 0.045, d / 2 - T / 2 - 0.02, { shadow: false });
+      addBox(group, panelMat, T, baseH, d, -w / 2 + T / 2, baseH / 2, 0);
+      addBox(group, panelMat, T, baseH, d, w / 2 - T / 2, baseH / 2, 0);
+      addBox(group, panelMat, w - 2 * T, T, d, 0, T / 2, 0);
+      addBox(group, panelMat, w - 2 * T, baseH - 2 * T, T, 0, baseH / 2, -d / 2 + T / 2);
+      addBox(group, toeKickMaterial, w - 2 * T, 0.09, T, 0, 0.045, d / 2 - T / 2 - 0.02, { shadow: false });
 
       const drawerModules = 1; // un módulo con cajones, fijo, sólo de apoyo visual
       // El horno ocupa un módulo completo (el del medio): ese módulo no dibuja su puerta
       // ni manilla normal, porque el horno pone su propio frente encima.
-      const ovenModuleIndex = state.oven ? Math.min(numModules - 1, Math.floor(numModules / 2)) : -1;
+      const ovenModuleIndex = (appliances && state.oven) ? Math.min(numModules - 1, Math.floor(numModules / 2)) : -1;
       for (let i = 0; i < numModules; i++) {
         if (i === ovenModuleIndex) continue;
         const cx = -w / 2 + moduleW * i + moduleW / 2;
@@ -307,24 +269,24 @@
           const frontH = (baseH - T * 1.4) / stack;
           for (let s = 0; s < stack; s++) {
             const cy = T * 0.7 + frontH * s + frontH / 2;
-            addBox(furnitureGroup, panelMat, moduleW - 0.01, frontH - 0.006, T * 0.8, cx, cy, frontZ);
-            addHandle(furnitureGroup, cx, cy, frontZ + T * 0.4 + 0.01, true, moduleW * 0.4);
+            addBox(group, panelMat, moduleW - 0.01, frontH - 0.006, T * 0.8, cx, cy, frontZ);
+            addHandle(group, cx, cy, frontZ + T * 0.4 + 0.01, true, moduleW * 0.4);
           }
         } else {
           const frontH = baseH - T * 1.4;
           const cy = T * 0.7 + frontH / 2;
           const side = cx < 0 ? 1 : -1;
-          addBox(furnitureGroup, panelMat, moduleW - 0.01, frontH, T * 0.8, cx, cy, frontZ);
-          addHandle(furnitureGroup, cx + side * (moduleW * 0.32), cy, frontZ + T * 0.4 + 0.01, false, 0.13);
+          addBox(group, panelMat, moduleW - 0.01, frontH, T * 0.8, cx, cy, frontZ);
+          addHandle(group, cx + side * (moduleW * 0.32), cy, frontZ + T * 0.4 + 0.01, false, 0.13);
         }
       }
 
-      addBox(furnitureGroup, counterMaterial, w + 0.02, counterT, d + 0.03, 0, baseH + counterT / 2, 0.01);
+      addBox(group, counterMaterial, w + 0.02, counterT, d + 0.03, 0, baseH + counterT / 2, 0.01);
 
-      if (state.sink) {
-        addBox(furnitureGroup, sinkMaterial, Math.min(0.5, w * 0.3), 0.02, Math.min(0.36, d * 0.55), 0, baseH + counterT - 0.008, 0, { shadow: false });
+      if (appliances && state.sink) {
+        addBox(group, sinkMaterial, Math.min(0.5, w * 0.3), 0.02, Math.min(0.36, d * 0.55), 0, baseH + counterT - 0.008, 0, { shadow: false });
       }
-      if (state.oven) {
+      if ((appliances && state.oven)) {
         // Horno con marco de acero, vidrio oscuro, panel de control y manilla horizontal
         // (en vez de una manilla vertical como las puertas), para que se lea como
         // electrodoméstico y no como un simple panel de otro color. Ocupa el módulo
@@ -334,35 +296,35 @@
         const ovenH = baseH - T * 1.6;
         const ovenCy = T * 0.8 + ovenH / 2;
         const frontZ = d / 2 - T * 0.25;
-        addBox(furnitureGroup, ovenFrameMaterial, ovenW, ovenH, T * 0.55, ovenCx, ovenCy, frontZ);
+        addBox(group, ovenFrameMaterial, ovenW, ovenH, T * 0.55, ovenCx, ovenCy, frontZ);
         const glassW = ovenW - 0.045;
         const glassH = ovenH - 0.05;
         const glassZ = frontZ + T * 0.32;
-        addBox(furnitureGroup, ovenGlassMaterial, glassW, glassH * 0.72, T * 0.15, ovenCx, ovenCy - glassH * 0.06, glassZ);
-        addBox(furnitureGroup, ovenFrameMaterial, glassW, glassH * 0.14, T * 0.15, ovenCx, ovenCy + glassH * 0.43, glassZ);
-        addHandle(furnitureGroup, ovenCx, ovenCy + glassH * 0.3, glassZ + 0.02, true, ovenW * 0.68, ovenHandleMaterial);
+        addBox(group, ovenGlassMaterial, glassW, glassH * 0.72, T * 0.15, ovenCx, ovenCy - glassH * 0.06, glassZ);
+        addBox(group, ovenFrameMaterial, glassW, glassH * 0.14, T * 0.15, ovenCx, ovenCy + glassH * 0.43, glassZ);
+        addHandle(group, ovenCx, ovenCy + glassH * 0.3, glassZ + 0.02, true, ovenW * 0.68, ovenHandleMaterial);
       }
     }
 
     if (state.upper && upperH > 0.15) {
       const upperCenterZ = -d / 2 + upperD / 2;
       const upperCy = upperBottom + upperH / 2;
-      addBox(furnitureGroup, panelMat, T, upperH, upperD, -w / 2 + T / 2, upperCy, upperCenterZ);
-      addBox(furnitureGroup, panelMat, T, upperH, upperD, w / 2 - T / 2, upperCy, upperCenterZ);
-      addBox(furnitureGroup, panelMat, w - 2 * T, T, upperD, 0, upperBottom + upperH - T / 2, upperCenterZ);
-      addBox(furnitureGroup, panelMat, w - 2 * T, T, upperD, 0, upperBottom + T / 2, upperCenterZ);
-      addBox(furnitureGroup, panelMat, w - 2 * T, upperH - 2 * T, T, 0, upperCy, -d / 2 + T / 2);
+      addBox(group, panelMat, T, upperH, upperD, -w / 2 + T / 2, upperCy, upperCenterZ);
+      addBox(group, panelMat, T, upperH, upperD, w / 2 - T / 2, upperCy, upperCenterZ);
+      addBox(group, panelMat, w - 2 * T, T, upperD, 0, upperBottom + upperH - T / 2, upperCenterZ);
+      addBox(group, panelMat, w - 2 * T, T, upperD, 0, upperBottom + T / 2, upperCenterZ);
+      addBox(group, panelMat, w - 2 * T, upperH - 2 * T, T, 0, upperCy, -d / 2 + T / 2);
 
       const doorZ = -d / 2 + upperD - T * 0.4;
       for (let i = 0; i < numModules; i++) {
         const cx = -w / 2 + moduleW * i + moduleW / 2;
         const side = cx < 0 ? 1 : -1;
-        addBox(furnitureGroup, panelMat, moduleW - 0.01, upperH - 2 * T, T * 0.8, cx, upperCy, doorZ);
-        addHandle(furnitureGroup, cx + side * (moduleW * 0.32), upperCy, doorZ + T * 0.4 + 0.01, false, 0.12);
+        addBox(group, panelMat, moduleW - 0.01, upperH - 2 * T, T * 0.8, cx, upperCy, doorZ);
+        addHandle(group, cx + side * (moduleW * 0.32), upperCy, doorZ + T * 0.4 + 0.01, false, 0.12);
       }
     }
 
-    if (state.hood) {
+    if (appliances && state.hood) {
       // Campana montada justo bajo la línea de los aéreos (o de donde irían si no están
       // activos), con un ducto corto de conexión hacia arriba para que se vea integrada.
       const hoodW = Math.min(w * 0.34, 0.85);
@@ -370,25 +332,11 @@
       const hoodH = 0.2;
       const hoodZ = -d / 2 + hoodD / 2 + 0.04;
       const canopyTop = upperBottom - 0.06;
-      addBox(furnitureGroup, hoodMaterial, hoodW, hoodH, hoodD, 0, canopyTop - hoodH / 2, hoodZ, { shadow: false });
+      addBox(group, hoodMaterial, hoodW, hoodH, hoodD, 0, canopyTop - hoodH / 2, hoodZ, { shadow: false });
       const ductH = 0.06;
-      addBox(furnitureGroup, hoodMaterial, hoodW * 0.4, ductH, hoodD * 0.6, 0, canopyTop + ductH / 2, hoodZ, { shadow: false });
+      addBox(group, hoodMaterial, hoodW * 0.4, ductH, hoodD * 0.6, 0, canopyTop + ductH / 2, hoodZ, { shadow: false });
     }
 
-    if (state.kitchenLayout === "l" && state.secondLeg > 0 && state.lower) {
-      const legLen = state.secondLeg / 100;
-      const legW = d;
-      const legX0 = w / 2 - legW;
-      const legZ0 = d / 2 - T;
-      const legCenterX = legX0 + legW / 2;
-      const legCenterZ = legZ0 + legLen / 2;
-      addBox(furnitureGroup, panelMat, T, baseH, legLen, legX0 + T / 2, baseH / 2, legCenterZ);
-      addBox(furnitureGroup, panelMat, T, baseH, legLen, legX0 + legW - T / 2, baseH / 2, legCenterZ);
-      addBox(furnitureGroup, panelMat, legW - 2 * T, T, legLen, legCenterX, T / 2, legCenterZ);
-      addBox(furnitureGroup, panelMat, legW - 2 * T, T * 0.8, legLen - 0.01, legCenterX, baseH - T * 1.3, legCenterZ, { shadow: false });
-      addHandle(furnitureGroup, legCenterX, baseH * 0.55, legZ0 + legLen - 0.02, false, 0.13);
-      addBox(furnitureGroup, counterMaterial, legW + 0.02, counterT, legLen + 0.02, legCenterX, baseH + counterT / 2, legCenterZ + 0.01);
-    }
   }
 
   // ---- Dimension lines (cotas) ------------------------------------------------
@@ -444,9 +392,12 @@
 
   function buildDimensions() {
     disposeGroup(dimensionGroup);
-    const w = state.width / 100;
-    const h = state.type === "kitchen" ? 2.4 : state.height / 100;
-    const d = state.depth / 100;
+    const bounds = new THREE.Box3().setFromObject(furnitureGroup);
+    const size = bounds.getSize(new THREE.Vector3());
+    const w = size.x;
+    const h = size.y;
+    const d = size.z;
+    dimensionGroup.position.set(bounds.getCenter(new THREE.Vector3()).x, bounds.min.y, bounds.getCenter(new THREE.Vector3()).z);
     const V3 = THREE.Vector3;
     const margin = 0.24;
     const tick = 0.05;
@@ -458,7 +409,7 @@
     dimensionGroup.add(makeLine([new V3(w / 2, -tick / 2, zW), new V3(w / 2, tick / 2, zW)]));
     dimensionGroup.add(makeLine([new V3(-w / 2, 0, d / 2), new V3(-w / 2, 0, zW)], extColor));
     dimensionGroup.add(makeLine([new V3(w / 2, 0, d / 2), new V3(w / 2, 0, zW)], extColor));
-    const widthLabel = makeTextSprite(formatMeasure(state.width));
+    const widthLabel = makeTextSprite(formatMeasure(w * 100));
     widthLabel.position.set(0, 0, zW + 0.05);
     dimensionGroup.add(widthLabel);
 
@@ -479,23 +430,38 @@
     dimensionGroup.add(makeLine([new V3(xD - tick / 2, yD, d / 2), new V3(xD + tick / 2, yD, d / 2)]));
     dimensionGroup.add(makeLine([new V3(w / 2, h, -d / 2), new V3(xD, yD, -d / 2)], extColor));
     dimensionGroup.add(makeLine([new V3(w / 2, h, d / 2), new V3(xD, yD, d / 2)], extColor));
-    const depthLabel = makeTextSprite(formatMeasure(state.depth));
+    const depthLabel = makeTextSprite(formatMeasure(d * 100));
     depthLabel.position.set(xD, yD + 0.06, 0);
     dimensionGroup.add(depthLabel);
+    if (state.type === "kitchen" && state.kitchenLayout === "l") {
+      const center = bounds.getCenter(new THREE.Vector3());
+      const x = bounds.max.x - center.x + 0.45;
+      const z0 = state.depth / 200 - center.z;
+      const z1 = z0 + state.secondLeg / 100;
+      dimensionGroup.add(makeLine([new V3(x, 0, z0), new V3(x, 0, z1)]));
+      const label = makeTextSprite("Tramo " + formatMeasure(state.secondLeg));
+      label.position.set(x, 0.12, (z0 + z1) / 2);
+      dimensionGroup.add(label);
+    }
   }
 
   // ---- Camera framing ---------------------------------------------------------
+  let lastFrameKey = "";
   function frameCamera() {
-    const legExtra = state.type === "kitchen" && state.kitchenLayout === "l" ? state.secondLeg / 100 : 0;
-    const effectiveHeight = state.type === "kitchen" ? 240 : state.height;
-    const maxDim = Math.max(state.width + legExtra, effectiveHeight, state.depth) / 100;
-    const minDistance = maxDim * 1.6;
-    const dir = camera.position.clone().sub(controls.target);
-    if (dir.length() < minDistance) {
-      dir.setLength(minDistance);
-      camera.position.copy(controls.target).add(dir);
-    }
-    controls.target.set(0, effectiveHeight / 200, 0);
+    // Bounding sphere in meters also accounts for portrait viewports and dimension labels.
+    const bounds = new THREE.Box3().setFromObject(furnitureGroup);
+    const frameKey = [...bounds.min.toArray(), ...bounds.max.toArray(), camera.aspect].join(",");
+    if (frameKey === lastFrameKey) return;
+    lastFrameKey = frameKey;
+    bounds.expandByScalar(0.35);
+    const sphere = bounds.getBoundingSphere(new THREE.Sphere());
+    const verticalFov = THREE.MathUtils.degToRad(camera.fov);
+    const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
+    const distance = sphere.radius / Math.sin(Math.min(verticalFov, horizontalFov) / 2);
+    const direction = camera.position.clone().sub(controls.target).normalize();
+    controls.target.copy(sphere.center);
+    camera.position.copy(sphere.center).addScaledVector(direction, distance);
+    controls.maxDistance = Math.max(16, distance * 2);
   }
 
   // ---- Render loop --------------------------------------------------------------
@@ -509,13 +475,15 @@
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
     renderer.setSize(width, height, false);
+    if (furnitureGroup.children.length) frameCamera();
   }
 
   function syncReadout() {
     if (!readout) return;
-    const h = state.type === "kitchen" ? 240 : state.height;
-    const legText = state.type === "kitchen" && state.kitchenLayout === "l" ? ` + ${Math.round(state.secondLeg)} cm (L)` : "";
-    readout.textContent = `${Math.round(state.width)} × ${Math.round(h)} × ${Math.round(state.depth)} cm${legText}`;
+    const size = new THREE.Box3().setFromObject(furnitureGroup).getSize(new THREE.Vector3());
+    const legText = state.type === "kitchen" && state.kitchenLayout === "l" ? ` · Segundo tramo: ${Math.round(state.secondLeg)} cm` : "";
+    readout.textContent = `Dimensiones exteriores: ${Math.round(size.x * 100)} × ${Math.round(size.y * 100)} × ${Math.round(size.z * 100)} cm${legText}`;
+
   }
 
   function animate() {
@@ -555,165 +523,9 @@
     ).observe(wrap);
   }
 
-  // ---- UI wiring ---------------------------------------------------------------
-  function fmt(cmValue) {
-    return state.unit === "mm" ? `${Math.round(cmValue * 10)} mm` : `${Math.round(cmValue)} cm`;
-  }
-
-  function syncOutputs() {
-    if (els.widthOut) els.widthOut.textContent = fmt(state.width);
-    if (els.secondLegOut) els.secondLegOut.textContent = fmt(state.secondLeg);
-    if (els.heightOut) els.heightOut.textContent = fmt(state.height);
-    if (els.depthOut) els.depthOut.textContent = fmt(state.depth);
-  }
-
-  function syncFieldsToState() {
-    if (els.width) els.width.value = String(state.width);
-    if (els.secondLeg) els.secondLeg.value = String(state.secondLeg);
-    if (els.height) els.height.value = String(state.height);
-    if (els.depth) els.depth.value = String(state.depth);
-    document.querySelectorAll('input[name="fcColor"]').forEach((i) => (i.checked = i.value === state.color));
-    if (els.rod) els.rod.checked = state.rod;
-    if (els.shelves) els.shelves.checked = state.shelves > 0;
-    if (els.drawers) els.drawers.checked = state.drawers > 0;
-    if (els.sink) els.sink.checked = state.sink;
-    if (els.oven) els.oven.checked = state.oven;
-    if (els.hood) els.hood.checked = state.hood;
-    document.querySelectorAll('input[name="fcKitchenLayout"]').forEach((i) => (i.checked = i.value === state.kitchenLayout));
-    const modulesValue = state.upper && state.lower ? "ambos" : state.upper ? "aereos" : "base";
-    document.querySelectorAll('input[name="fcModules"]').forEach((i) => (i.checked = i.value === modulesValue));
-  }
-
-  function applyTypeVisibility() {
-    const isKitchen = state.type === "kitchen";
-    if (els.widthLabel) els.widthLabel.textContent = isKitchen ? "Largo principal" : "Ancho";
-    if (els.kitchenLayoutGroup) els.kitchenLayoutGroup.hidden = !isKitchen;
-    if (els.secondLegGroup) els.secondLegGroup.hidden = !isKitchen || state.kitchenLayout !== "l";
-    if (els.closetHeightGroup) els.closetHeightGroup.hidden = isKitchen;
-    if (els.kitchenFields) els.kitchenFields.hidden = !isKitchen;
-    if (els.closetFields) els.closetFields.hidden = isKitchen;
-    if (els.appliancesGroup) els.appliancesGroup.hidden = !isKitchen;
-  }
-
-  function markDirty() {
+  window.addEventListener("taller:configuration", (event) => {
+    Object.assign(state, event.detail);
     dirty = true;
-  }
-
-  // El cálculo de precio (script.js) escucha estos mismos campos por su cuenta.
-  // Cuando este archivo cambia varios campos a la vez (cambio de tipo, restablecer),
-  // dispara un evento sintético al final para que el precio se recalcule con los
-  // valores ya sincronizados, en vez de quedarse con los valores previos al cambio.
-  function notifyPriceRecalc() {
-    els.width?.dispatchEvent(new Event("input", { bubbles: true }));
-  }
-
-  applyTypeVisibility();
-
-  document.querySelectorAll('input[name="fcType"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      if (!input.checked) return;
-      state.type = input.value;
-      Object.assign(state, state.type === "kitchen" ? KITCHEN_DEFAULTS : CLOSET_DEFAULTS);
-      syncFieldsToState();
-      applyTypeVisibility();
-      syncOutputs();
-      markDirty();
-      notifyPriceRecalc();
-    });
   });
-
-  document.querySelectorAll('input[name="fcKitchenLayout"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      if (!input.checked) return;
-      state.kitchenLayout = input.value;
-      applyTypeVisibility();
-      markDirty();
-    });
-  });
-
-  document.querySelectorAll('input[name="fcModules"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      if (!input.checked) return;
-      state.upper = input.value !== "base";
-      state.lower = input.value !== "aereos";
-      markDirty();
-    });
-  });
-
-  document.querySelectorAll('input[name="fcFinish"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      if (!input.checked) return;
-      state.material = input.value;
-      markDirty();
-    });
-  });
-
-  document.querySelectorAll('input[name="fcColor"]').forEach((input) => {
-    input.addEventListener("change", () => {
-      if (!input.checked) return;
-      state.color = input.value;
-      markDirty();
-    });
-  });
-
-  els.width?.addEventListener("input", (e) => {
-    state.width = Number(e.target.value);
-    syncOutputs();
-    markDirty();
-  });
-  els.secondLeg?.addEventListener("input", (e) => {
-    state.secondLeg = Number(e.target.value);
-    syncOutputs();
-    markDirty();
-  });
-  els.height?.addEventListener("input", (e) => {
-    state.height = Number(e.target.value);
-    syncOutputs();
-    markDirty();
-  });
-  els.depth?.addEventListener("input", (e) => {
-    state.depth = Number(e.target.value);
-    syncOutputs();
-    markDirty();
-  });
-  els.rod?.addEventListener("change", (e) => {
-    state.rod = e.target.checked;
-    markDirty();
-  });
-  els.shelves?.addEventListener("change", (e) => {
-    state.shelves = e.target.checked ? SHELF_COUNT : 0;
-    markDirty();
-  });
-  els.drawers?.addEventListener("change", (e) => {
-    state.drawers = e.target.checked ? DRAWER_COUNT : 0;
-    markDirty();
-  });
-  els.sink?.addEventListener("change", (e) => {
-    state.sink = e.target.checked;
-    markDirty();
-  });
-  els.oven?.addEventListener("change", (e) => {
-    state.oven = e.target.checked;
-    markDirty();
-  });
-  els.hood?.addEventListener("change", (e) => {
-    state.hood = e.target.checked;
-    markDirty();
-  });
-
-  els.reset?.addEventListener("click", () => {
-    Object.assign(state, state.type === "kitchen" ? KITCHEN_DEFAULTS : CLOSET_DEFAULTS);
-    state.material = "standard";
-    state.color = DEFAULT_COLOR;
-    state.unit = "cm";
-    syncFieldsToState();
-    document.querySelectorAll('input[name="fcFinish"]').forEach((i) => (i.checked = i.value === "standard"));
-    applyTypeVisibility();
-    syncOutputs();
-    markDirty();
-    notifyPriceRecalc();
-  });
-
-  syncOutputs();
   }
 })();
