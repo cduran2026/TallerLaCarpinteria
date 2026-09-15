@@ -481,8 +481,8 @@
   function syncReadout() {
     if (!readout) return;
     const size = new THREE.Box3().setFromObject(furnitureGroup).getSize(new THREE.Vector3());
-    const legText = state.type === "kitchen" && state.kitchenLayout === "l" ? ` · Segundo tramo: ${Math.round(state.secondLeg)} cm` : "";
-    readout.textContent = `Dimensiones exteriores: ${Math.round(size.x * 100)} × ${Math.round(size.y * 100)} × ${Math.round(size.z * 100)} cm${legText}`;
+    const legText = state.type === "kitchen" && state.kitchenLayout === "l" ? ` · Segundo tramo: ${formatMeasure(state.secondLeg)}` : "";
+    readout.textContent = `Dimensiones exteriores: ${formatMeasure(size.x * 100)} × ${formatMeasure(size.y * 100)} × ${formatMeasure(size.z * 100)}${legText}`;
 
   }
 
@@ -523,8 +523,8 @@
     ).observe(wrap);
   }
 
-  window.addEventListener("taller:configuration", (event) => {
-    Object.assign(state, event.detail);
+  window.TALLER_CONFIGURATION.subscribe((configuration) => {
+    Object.assign(state, configuration);
     dirty = true;
   });
   }
