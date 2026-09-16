@@ -1,0 +1,27 @@
+.maestro{padding-bottom:0}
+.maestro-header{display:flex;align-items:center;flex-wrap:wrap;gap:20px;padding:18px 4%;background:var(--walnut);color:var(--bg)}
+.maestro-header nav{display:flex;flex-wrap:wrap;gap:18px;font-size:.9rem}
+.maestro-header .button{color:var(--bg)}
+.workshop-bar{padding:12px 4%;border-bottom:1px solid var(--border);background:var(--surface-alt)}
+.workshop-bar select{margin-left:12px;max-width:80%;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.maestro-main{width:min(92%,1200px);margin:36px auto 80px}
+.maestro h1{font-size:clamp(1.8rem,4vw,2.6rem);line-height:1.15;letter-spacing:-.03em}
+.maestro h2{font-size:1.3rem}
+.maestro .card{padding:clamp(18px,3vw,30px);border:1px solid var(--border);border-radius:var(--radius-md);background:var(--surface);box-shadow:var(--shadow-sm);margin-bottom:24px}
+.maestro .login-card{max-width:520px;margin:45px auto}
+.maestro .form-grid,.maestro .stats{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+.maestro .field{display:grid;gap:6px;margin-bottom:16px;font-size:.9rem;font-weight:600}
+.maestro .field input,.maestro .field select,.maestro .field textarea{width:100%;min-width:0;padding:11px 12px;border:1px solid var(--border);border-radius:10px;background:#fff;color:var(--text)}
+.maestro .field textarea{min-height:100px;resize:vertical}
+.maestro .actions{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin:18px 0}
+.maestro .notice{padding:14px 18px;background:var(--surface-alt);border-radius:12px;white-space:pre-wrap}
+.maestro .error{color:#7b2631}
+.maestro button:disabled{opacity:.55;cursor:not-allowed}
+.maestro .record-list{list-style:none;padding:0;display:grid;gap:12px}
+.maestro .record-list li{padding:16px;border:1px solid var(--border);border-radius:12px;overflow-wrap:anywhere}
+.maestro .record-list a{font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.maestro .muted{color:var(--muted);font-size:.88rem}
+.maestro .metric{font-size:2rem;font-weight:800;display:block}
+.maestro .designer-frame{width:100%;height:1300px;border:0;display:block;background:var(--bg)}
+.maestro .editor-toolbar{position:sticky;top:0;z-index:10;background:var(--bg);padding:8px 0;display:flex;flex-wrap:wrap;gap:12px;align-items:center;border-bottom:1px solid var(--border)}
+@media(max-width:600px){.maestro-header nav{order:3;width:100%}.maestro-header .brand-copy strong{font-size:.75rem}.maestro-main{margin-top:24px}.maestro .designer-frame{height:1900px}}
