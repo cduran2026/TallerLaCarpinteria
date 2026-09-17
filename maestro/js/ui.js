@@ -20,7 +20,11 @@ export const emptyState = (title, description, action) => h('div', { class: 'emp
   h('strong', {}, title), h('p', {}, description), action || null);
 export function formatShortDate(value) {
   if (!value) return 'Sin fecha';
-  return new Intl.DateTimeFormat('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const date = dateOnly
+    ? new Date(...value.split('-').map((part, index) => Number(part) - (index === 1 ? 1 : 0)))
+    : new Date(value);
+  return new Intl.DateTimeFormat('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }).format(date);
 }
 export function timeAgo(value) {
   if (!value) return 'Sin actividad reciente';

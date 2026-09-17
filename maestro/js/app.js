@@ -5,6 +5,7 @@ import { loadWorkshops, currentWorkshop, selectWorkshop, clearWorkshop } from '.
 import { h, errorText } from './ui.js';
 import { login } from './views/login.js';
 import { dashboard } from './views/dashboard.js';
+import { projects } from './views/projects.js';
 import { clients } from './views/clients.js';
 import { projectForm } from './views/project-form.js';
 import { projectDetail } from './views/project-detail.js';
@@ -36,10 +37,10 @@ function updateShell(path, query) {
   let eyebrow = 'Espacio de trabajo';
   let title = 'Dashboard';
   if (path === '/clientes') { section = 'clients'; eyebrow = 'Relaciones'; title = 'Clientes'; }
+  else if (path === '/proyectos') { section = 'projects'; eyebrow = 'Cartera de trabajo'; title = 'Proyectos'; }
   else if (path === '/proyectos/nuevo') { section = 'projects'; eyebrow = 'Proyectos'; title = 'Nuevo proyecto'; }
   else if (path.startsWith('/proyectos/') && path.includes('/disenos/')) { section = 'designs'; eyebrow = 'Diseñador'; title = 'Diseño del proyecto'; }
   else if (path.startsWith('/proyectos/')) { section = 'projects'; eyebrow = 'Proyectos'; title = 'Ficha de proyecto'; }
-  else if (query?.get('seccion') === 'proyectos') { section = 'projects'; eyebrow = 'Espacio de trabajo'; title = 'Proyectos'; }
   else if (query?.get('seccion') === 'disenos') { section = 'designs'; eyebrow = 'Espacio de trabajo'; title = 'Diseños'; }
   contextEyebrow.textContent = eyebrow;
   contextTitle.textContent = title;
@@ -102,6 +103,7 @@ async function render(force = false) {
     updateShell(path, query);
     let view;
     if (path === '/login' || path === '/dashboard') view = await dashboard(workshop, query);
+    else if (path === '/proyectos') view = await projects(workshop, query);
     else if (path === '/clientes') view = await clients(workshop, query);
     else if (path === '/proyectos/nuevo') view = await projectForm(workshop, query);
     else if (parts.length === 2 && parts[0] === 'proyectos') view = await projectDetail(workshop, parts[1]);

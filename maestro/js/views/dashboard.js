@@ -71,6 +71,7 @@ export async function dashboard(workshop, query) {
       h('div', {}, h('span', { class: 'section-kicker' }, 'Trabajo en curso'), h('h2', {}, 'Proyectos recientes')),
       h('div', { class: 'panel-actions' },
         projects.length ? h('span', { class: 'panel-count' }, projects.length + ' en total') : null,
+        projects.length ? h('a', { class: 'panel-link', href: '#/proyectos' }, 'Ver todos') : null,
         h('a', { class: 'panel-link', href: '#/proyectos/nuevo' }, 'Nuevo proyecto'))),
     projects.length
       ? h('div', { class: 'project-work-list' }, projects.slice(0, 6).map(project =>
@@ -107,7 +108,6 @@ export async function dashboard(workshop, query) {
     element,
     mount: () => {
       const section = query?.get('seccion');
-      if (section === 'proyectos') document.querySelector('#dashboard-projects')?.scrollIntoView({ block: 'start' });
       if (section === 'disenos') document.querySelector('#dashboard-designs')?.scrollIntoView({ block: 'start' });
     },
   };
