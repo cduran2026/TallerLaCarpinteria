@@ -50,3 +50,24 @@ No sustituye las pruebas de Auth, base de datos y RLS del proyecto Supabase real
 
 Ver `../supabase/README.md` para configuración y migraciones. Nada se despliega
 automáticamente. No están implementados despiece, BOM, costos ni proveedores.
+
+## Sistema visual de Modo Maestro
+
+El shell de aplicación usa sidebar, header contextual y un área principal adaptable.
+Los tokens viven bajo la clase maestro en maestro.css, separados de los estilos de la
+web pública:
+
+- fondos cálidos y superficies blancas;
+- verde profundo para navegación y acciones primarias;
+- dorado/madera para énfasis y materialidad;
+- radios de 10, 16 y 24 px;
+- sombras suaves para jerarquía, sin simular paneles pesados;
+- escala de spacing basada principalmente en 8 px.
+
+Los componentes compartidos incluyen botones, campos, cards, paneles, badges de
+estado, avisos, estados vacíos, métricas de trabajo y filas de proyecto. ui.js
+centraliza las etiquetas y badges para Borrador, En diseño, Aprobado y Archivado.
+
+En tablet y móvil la sidebar se convierte en un menú superpuesto. El área principal
+no impone columnas al editor, de modo que el futuro Diseñador V2 podrá usar una
+composición Estructura | Visor 3D | Inspector sin modificar el shell general.

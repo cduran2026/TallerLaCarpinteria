@@ -14,6 +14,22 @@ export const button = (text, attrs = {}) => h('button', { type: 'submit', class:
 export const link = (text, href) => h('a', { href, class: 'button button-secondary' }, text);
 export const typeLabel = type => type === 'kitchen' ? 'Cocina' : 'Clóset';
 export const statuses = { draft: 'Borrador', in_design: 'En diseño', approved: 'Aprobado', archived: 'Archivado' };
+export const statusBadge = status => h('span', { class: 'status-badge', 'data-status': status }, statuses[status] || status);
+export const emptyState = (title, description, action) => h('div', { class: 'empty-state' },
+  h('span', { class: 'empty-state-mark', 'aria-hidden': 'true' }, '◇'),
+  h('strong', {}, title), h('p', {}, description), action || null);
+export function formatShortDate(value) {
+  if (!value) return 'Sin fecha';
+  return new Intl.DateTimeFormat('es-CL', { day: '2-digit', month: 'short', year: 'numeric' }).format(new Date(value));
+}
+export function timeAgo(value) {
+  if (!value) return 'Sin actividad reciente';
+  const days = Math.round((new Date(value).getTime() - Date.now()) / 86400000);
+  if (Math.abs(days) < 1) return 'Hoy';
+  if (days === -1) return 'Ayer';
+  if (days > -7 && days < 0) return 'Hace ' + Math.abs(days) + ' días';
+  return formatShortDate(value);
+}
 export function values(form) {
   return Object.fromEntries([...new FormData(form)].map(([key, value]) => [key, String(value).trim() || null]));
 }

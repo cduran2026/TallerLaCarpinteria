@@ -16,15 +16,63 @@
 </head>
 <body class="maestro">
   <a class="skip-link" href="#app">Saltar al contenido</a>
-  <header class="maestro-header">
-    <a class="brand" href="../"><img src="../assets/brand/logo.jpg" width="48" height="48" alt="Taller La Carpintería"><span class="brand-copy"><strong>Modo Maestro</strong><small>Taller La Carpintería</small></span></a>
-    <nav id="app-nav" aria-label="Navegación Modo Maestro" hidden>
-      <a href="#/dashboard">Dashboard</a><a href="#/clientes">Clientes</a><a href="#/proyectos/nuevo">Nuevo proyecto</a>
-    </nav>
-    <button id="logout" class="button button-secondary" type="button" hidden>Cerrar sesión</button>
-  </header>
-  <div id="workshop-bar" class="workshop-bar" hidden></div>
-  <main id="app" class="maestro-main" tabindex="-1" aria-live="polite"><p>Cargando Modo Maestro…</p></main>
+  <div class="maestro-shell">
+    <aside id="maestro-sidebar" class="maestro-sidebar" aria-label="Navegación principal">
+      <div class="sidebar-brand-row">
+        <a class="maestro-brand" href="#/dashboard">
+          <img src="../assets/brand/logo.jpg" width="44" height="44" alt="">
+          <span><strong>Modo Maestro</strong><small id="sidebar-workshop-name">La Carpintería</small></span>
+        </a>
+        <button id="sidebar-close" class="icon-button sidebar-close" type="button" aria-label="Cerrar menú">×</button>
+      </div>
+      <nav id="app-nav" class="app-nav" aria-label="Navegación Modo Maestro" hidden>
+        <span class="nav-label">Espacio de trabajo</span>
+        <a href="#/dashboard" data-nav="dashboard">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6v-9h-6v9Zm0-16v5h6V4h-6Z"/></svg>
+          <span>Dashboard</span>
+        </a>
+        <a href="#/dashboard?seccion=proyectos" data-nav="projects">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H10l2 2h5.5A2.5 2.5 0 0 1 20 8.5v8A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-10Z"/></svg>
+          <span>Proyectos</span>
+        </a>
+        <a href="#/clientes" data-nav="clients">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M16 20v-1.5A3.5 3.5 0 0 0 12.5 15h-5A3.5 3.5 0 0 0 4 18.5V20m6-9a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm6-1 1.5 1.5L21 8"/></svg>
+          <span>Clientes</span>
+        </a>
+        <a href="#/dashboard?seccion=disenos" data-nav="designs">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4-8-4Zm0 5 8 4 8-4M4 17l8 4 8-4"/></svg>
+          <span>Diseños</span>
+        </a>
+        <span class="nav-item-disabled" aria-disabled="true">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3.07 14H3v-4h.08A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.97 4 1.7 1.7 0 0 0 10 2.44V2h4v.44A1.7 1.7 0 0 0 15.03 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9 1.7 1.7 0 0 0 20.93 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>
+          <span>Configuración</span>
+          <small>Próximamente</small>
+        </span>
+        <div class="nav-future">
+          <span class="nav-label">Próximas herramientas</span>
+          <span>Materiales</span><span>Costos</span><span>Proveedores</span>
+        </div>
+      </nav>
+      <a class="sidebar-public-link" href="../">Volver al sitio público <span aria-hidden="true">↗</span></a>
+    </aside>
+    <button id="sidebar-overlay" class="sidebar-overlay" type="button" aria-label="Cerrar menú" tabindex="-1"></button>
+    <div class="maestro-workspace">
+      <header class="maestro-topbar">
+        <button id="sidebar-toggle" class="icon-button sidebar-toggle" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="maestro-sidebar">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="context-heading">
+          <small id="context-eyebrow">Espacio de trabajo</small>
+          <strong id="context-title">Dashboard</strong>
+        </div>
+        <div class="topbar-actions">
+          <div id="workshop-bar" class="workshop-bar" hidden></div>
+          <button id="logout" class="logout-button" type="button" hidden><span>Cerrar sesión</span><b aria-hidden="true">↗</b></button>
+        </div>
+      </header>
+      <main id="app" class="maestro-main" tabindex="-1" aria-live="polite"><p class="loading-copy">Cargando Modo Maestro…</p></main>
+    </div>
+  </div>
   <noscript>Activa JavaScript para utilizar Modo Maestro. <a href="../">Volver a la web pública</a>.</noscript>
 </body>
 </html>
