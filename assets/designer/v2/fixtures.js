@@ -4,12 +4,14 @@
     ? require("./schema.js") : root.TALLER_DESIGNER_V2_SCHEMA;
   const profiles = typeof module === "object" && module.exports
     ? require("./profiles.js") : root.TALLER_DESIGNER_V2_PROFILES;
-  const api = factory(schema, profiles);
+  const distribution = typeof module === "object" && module.exports
+    ? require("./closet-distribution.js") : root.TALLER_DESIGNER_V2_CLOSET_DISTRIBUTION;
+  const api = factory(schema, profiles, distribution);
   if (typeof module === "object" && module.exports) module.exports = api;
   else root.TALLER_DESIGNER_V2_FIXTURES = Object.freeze(api);
-})(typeof globalThis !== "undefined" ? globalThis : this, function (schema, profiles) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (schema, profiles, distribution) {
   "use strict";
-  if (!schema || !profiles) throw new Error("Designer V2 fixtures requiere schema.js y profiles.js.");
+  if (!schema || !profiles || !distribution) throw new Error("Designer V2 fixtures requiere schema.js, profiles.js y closet-distribution.js.");
 
   function quantity(mode, recommended, applied) {
     return { mode, recommended, applied, resolved: applied };
@@ -57,57 +59,60 @@
     return schema.createEnvelope(configuration);
   }
 
-  function createClosetThreeBodies(profile) {
+  function createCloset(profile, totalWidthMm) {
     profile = profile || profiles.DEFAULT_PROFILE;
     const standards = profiles.createStandardsSnapshot(profile);
-    const width = profile.closet.targetBodyWidthMm;
+    totalWidthMm = totalWidthMm || profile.closet.targetBodyWidthMm * 3;
+    const plan = distribution.planClosetWidths(totalWidthMm, profile.closet);
+    if (!plan.isFeasible) throw new Error(plan.reason);
     const height = profile.closet.defaultHeightMm;
     const depth = profile.closet.defaultDepthMm;
     const usableHeight = height - profile.closet.shelfTopClearanceMm - profile.closet.shelfBottomClearanceMm;
     const recommendedShelves = Math.max(0, Math.round(usableHeight / profile.closet.targetShelfSpacingMm) - 1);
+    const modules = plan.widths.map(function (width, index) {
+      const number = index + 1;
+      const id = "closet-body-" + number;
+      if (index === 0) return module(id, "closet-main", "body", index, "closet.hanging", width, height, depth, [
+        component(id + "-shelf", "shelfSet", "manual", 1, 1, {
+          distribution: "manual", positionsMm: [height - profile.closet.topShelfOffsetMm],
+        }),
+        component(id + "-rod", "rodSet", "automatic", 1, 1, { heightMm: profile.closet.defaultRodHeightMm }),
+      ]);
+      if (index === 1) return module(id, "closet-main", "body", index, "closet.shelves", width, height, depth, [
+        component(id + "-shelves", "shelfSet", "automatic", recommendedShelves, recommendedShelves, {
+          distribution: "equal", targetSpacingMm: profile.closet.targetShelfSpacingMm,
+        }),
+      ]);
+      if (index === 2) return module(id, "closet-main", "body", index, "closet.mixed", width, height, depth, [
+        component(id + "-drawers", "drawerStack", "manual", profile.closet.defaultDrawerCount, profile.closet.defaultDrawerCount),
+        component(id + "-shelves", "shelfSet", "manual", recommendedShelves, 2, { distribution: "equal" }),
+      ]);
+      return module(id, "closet-main", "body", index, "closet.open", width, height, depth, []);
+    });
     return envelope({
       type: "closet",
       units: schema.UNIT,
-      dimensions: { widthMm: width * 3, heightMm: height, depthMm: depth },
+      dimensions: { widthMm: totalWidthMm, heightMm: height, depthMm: depth },
       materials: materials(profile),
       standards,
       layout: {
         kind: "linear",
         runs: [{
           id: "closet-main",
-          lengthMm: width * 3,
+          lengthMm: totalWidthMm,
           originMm: { x: 0, z: 0 },
           rotationDeg: 0,
           zones: [{ id: "body", startReserveMm: 0, endReserveMm: 0 }],
         }],
       },
-      modules: [
-        module("closet-body-1", "closet-main", "body", 0, "closet.hanging", width, height, depth, [
-          component("closet-body-1-shelf", "shelfSet", "manual", 1, 1, {
-            distribution: "manual",
-            positionsMm: [height - profile.closet.topShelfOffsetMm],
-          }),
-          component("closet-body-1-rod", "rodSet", "automatic", 1, 1, { heightMm: profile.closet.defaultRodHeightMm }),
-        ]),
-        module("closet-body-2", "closet-main", "body", 1, "closet.shelves", width, height, depth, [
-          component("closet-body-2-shelves", "shelfSet", "automatic", recommendedShelves, recommendedShelves, {
-            distribution: "equal",
-            targetSpacingMm: profile.closet.targetShelfSpacingMm,
-          }),
-        ]),
-        module("closet-body-3", "closet-main", "body", 2, "closet.mixed", width, height, depth, [
-          component(
-            "closet-body-3-drawers",
-            "drawerStack",
-            "manual",
-            profile.closet.defaultDrawerCount,
-            profile.closet.defaultDrawerCount
-          ),
-          component("closet-body-3-shelves", "shelfSet", "manual", recommendedShelves, 2, { distribution: "equal" }),
-        ]),
-      ],
+      modules,
       provenance: { createdFrom: "fixture", migration: null },
     });
+  }
+
+  function createClosetThreeBodies(profile) {
+    profile = profile || profiles.DEFAULT_PROFILE;
+    return createCloset(profile, profile.closet.targetBodyWidthMm * 3);
   }
 
   function kitchenBaseModule(id, runId, order, type, width, profile, componentType, amount) {
@@ -237,5 +242,5 @@
     });
   }
 
-  return { quantity, createClosetThreeBodies, createStraightKitchen, createLKitchen };
+  return { quantity, createCloset, createClosetThreeBodies, createStraightKitchen, createLKitchen };
 });

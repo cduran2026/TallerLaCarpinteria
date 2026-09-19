@@ -50,7 +50,8 @@ function moduleTypeLabel(type) {
 export async function mountClosetV2(container, initialEnvelope, signal) {
   const storeApi = window.TALLER_DESIGNER_V2_STORE;
   const fixtures = window.TALLER_DESIGNER_V2_FIXTURES;
-  if (!storeApi || !fixtures) throw new Error('El núcleo del Diseñador V2 no está disponible.');
+  const distribution = window.TALLER_DESIGNER_V2_CLOSET_DISTRIBUTION;
+  if (!storeApi || !fixtures || !distribution) throw new Error('El núcleo del Diseñador V2 no está disponible.');
   const store = storeApi.createDesignStore(initialEnvelope || fixtures.createClosetThreeBodies());
   const subscribers = new Set();
   let selectedId = store.getState().configuration.modules[0]?.id;
@@ -63,6 +64,7 @@ export async function mountClosetV2(container, initialEnvelope, signal) {
   const message = h('p', { class: 'closet-editor-message', role: 'status' });
   const viewerStage = h('div', { class: 'closet-viewer-stage' }, h('p', { class: 'closet-viewer-loading' }, 'Preparando visor 3D…'));
   const addBody = h('button', { class: 'button button-secondary', type: 'button' }, '+ Agregar cuerpo');
+  const autoDistribute = h('button', { class: 'button button-quiet', type: 'button' }, 'Distribución automática');
   const views = ['perspective', 'front', 'top'].map((view, index) => h('button', {
     class: 'viewer-view-button' + (index === 0 ? ' active' : ''), type: 'button', 'data-view': view,
     onclick: event => {
@@ -74,7 +76,7 @@ export async function mountClosetV2(container, initialEnvelope, signal) {
     h('aside', { class: 'closet-zone closet-structure' },
       h('header', { class: 'closet-zone-heading' }, h('span', {}, 'Estructura'), h('strong', {}, 'Cuerpos del clóset')),
       occupancy, statusFlags, structureList,
-      h('footer', { class: 'closet-structure-footer' }, addBody)),
+      h('footer', { class: 'closet-structure-footer' }, autoDistribute, addBody)),
     h('section', { class: 'closet-zone closet-viewer' },
       h('header', { class: 'closet-viewer-toolbar' },
         h('div', {}, h('span', {}, 'Visor 3D'), h('small', {}, 'Selecciona un cuerpo para editarlo')),
@@ -211,6 +213,22 @@ export async function mountClosetV2(container, initialEnvelope, signal) {
         heightMm: state.configuration.dimensions.heightMm, depthMm: state.configuration.dimensions.depthMm },
       components: [], options: {}, locks: { width: false } });
     selectedId = id; renderAll(store.getState());
+  }));
+
+  autoDistribute.addEventListener('click', () => perform(() => {
+    const state = store.getState();
+    const run = state.configuration.layout.runs[0];
+    const zone = run.zones.find(item => item.id === 'body');
+    const currentCount = state.configuration.modules.filter(item => item.runId === run.id && item.zone === 'body').length;
+    const plan = distribution.planClosetWidths(
+      run.lengthMm - zone.startReserveMm - zone.endReserveMm,
+      state.configuration.standards.snapshot.closet,
+      { preferredCount: currentCount }
+    );
+    if (!plan.isFeasible) throw new Error(plan.reason);
+    const ids = store.autoDistributeCloset(plan.widths, { runId: run.id, zone: 'body' });
+    if (!ids.includes(selectedId)) selectedId = ids[0];
+    message.textContent = `Distribución automática aplicada: ${plan.widths.join(' + ')} mm.`;
   }));
 
   const unsubscribeStore = store.subscribe((state, metadata) => {

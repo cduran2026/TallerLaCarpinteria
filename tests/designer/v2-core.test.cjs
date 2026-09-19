@@ -4,6 +4,7 @@ const path = require("node:path");
 const vm = require("node:vm");
 const schema = require("../../assets/designer/v2/schema.js");
 const profiles = require("../../assets/designer/v2/profiles.js");
+const closetDistribution = require("../../assets/designer/v2/closet-distribution.js");
 const validation = require("../../assets/designer/v2/validation.js");
 const fixtures = require("../../assets/designer/v2/fixtures.js");
 const { createDesignStore } = require("../../assets/designer/v2/store.js");
@@ -59,6 +60,45 @@ function testConfigurableProfile() {
   profile.closet.targetBodyWidthMm = 999;
   assert.equal(closet.configuration.standards.snapshot.closet.targetBodyWidthMm, 700);
   console.log("PASS configurable, detached standards snapshot");
+}
+
+function testAutomaticClosetDistribution() {
+  const profile = profiles.DEFAULT_PROFILE.closet;
+  assert.deepEqual(closetDistribution.planClosetWidths(1800, profile).widths, [600, 600, 600]);
+  assert.deepEqual(closetDistribution.planClosetWidths(2000, profile).widths, [667, 667, 666]);
+  assert.deepEqual(closetDistribution.planClosetWidths(1800, profile, { preferredCount: 4 }).widths, [450, 450, 450, 450]);
+  assert.equal(closetDistribution.planClosetWidths(400, profile).isFeasible, false);
+
+  const generated = fixtures.createCloset(profiles.DEFAULT_PROFILE, 2000);
+  assert.deepEqual(generated.configuration.modules.map((item) => item.dimensions.widthMm), [667, 667, 666]);
+  const generatedStatus = validation.validateEnvelope(generated);
+  assert.equal(generatedStatus.isValid, true);
+  assert.equal(generatedStatus.isComplete, true);
+  assert.equal(generatedStatus.canGenerateTechnicalOutputs, true);
+
+  const incomplete = fixtures.createClosetThreeBodies();
+  incomplete.configuration.modules = [incomplete.configuration.modules[0]];
+  incomplete.configuration.modules[0].order = 0;
+  let sequence = 0;
+  const store = createDesignStore(incomplete, { idFactory: kind => `${kind}-auto-${++sequence}` });
+  assert.equal(store.getOccupancy()[0].status, "deficit");
+  const plan = closetDistribution.planClosetWidths(1800, profile, { preferredCount: 1 });
+  store.autoDistributeCloset(plan.widths);
+  assert.equal(store.getState().configuration.modules.length, 3);
+  assert.deepEqual(store.getState().configuration.modules.map((item) => item.dimensions.widthMm), [600, 600, 600]);
+  assert.equal(store.getStatus().canGenerateTechnicalOutputs, true);
+  store.changeModuleWidth(store.getState().configuration.modules[0].id, 550);
+  assert.equal(store.getOccupancy()[0].status, "deficit", "manual editing remains available");
+
+  store.setModuleWidthLocked(store.getState().configuration.modules[0].id, true);
+  const beforeLocked = store.getState();
+  assert.throws(() => store.autoDistributeCloset([600, 600, 600]), error => error.code === "WIDTH_LOCKED");
+  assert.deepEqual(store.getState(), beforeLocked, "locked automatic distribution rejects atomically");
+  store.setModuleWidthLocked(store.getState().configuration.modules[0].id, false);
+  const beforeOutOfRange = store.getState();
+  assert.throws(() => store.autoDistributeCloset([400, 700, 700]), error => error.code === "CLOSET_DISTRIBUTION_RANGE");
+  assert.deepEqual(store.getState(), beforeOutOfRange, "out-of-profile distribution rejects atomically");
+  console.log("PASS automatic closet distribution from technical profile");
 }
 
 function testPureValidation() {
@@ -256,7 +296,7 @@ function testBrowserPortabilityWithoutDomOrThree() {
   context.globalThis = context;
   vm.createContext(context);
   const base = path.resolve(__dirname, "../../assets/designer/v2");
-  for (const file of ["schema.js", "profiles.js", "occupancy.js", "validation.js", "store.js", "fixtures.js"]) {
+  for (const file of ["schema.js", "profiles.js", "closet-distribution.js", "occupancy.js", "validation.js", "store.js", "fixtures.js"]) {
     vm.runInContext(fs.readFileSync(path.join(base, file), "utf8"), context, { filename: file });
   }
   const envelope = context.TALLER_DESIGNER_V2_FIXTURES.createClosetThreeBodies();
@@ -271,6 +311,7 @@ function testBrowserPortabilityWithoutDomOrThree() {
 
 testFixtures();
 testConfigurableProfile();
+testAutomaticClosetDistribution();
 testPureValidation();
 testStoreOperations();
 testMoveAcrossZonesAndDuplicateComponents();

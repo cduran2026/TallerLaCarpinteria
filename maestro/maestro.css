@@ -512,7 +512,7 @@ a.directory-title:hover{color:#795A2B}
 .closet-module-quick-actions{padding:0 10px 8px;display:flex;gap:5px;justify-content:flex-end}
 .closet-module-quick-actions button{width:29px;height:27px;border:1px solid var(--app-line);border-radius:8px;background:#FFF;color:#625D53}
 .closet-module-quick-actions button:hover:not(:disabled){border-color:#C2A15A;background:var(--app-gold-soft)}
-.closet-structure-footer{margin-top:auto;padding:12px;border-top:1px solid var(--app-line);background:var(--app-surface-soft)}
+.closet-structure-footer{margin-top:auto;padding:12px;border-top:1px solid var(--app-line);background:var(--app-surface-soft);display:grid;gap:8px}
 .closet-structure-footer .button{width:100%}
 .closet-viewer{position:relative;display:grid;grid-template-rows:auto minmax(480px,1fr) auto;background:#F5F1E8}
 .closet-viewer-toolbar{padding:12px 14px;display:flex;align-items:center;justify-content:space-between;gap:14px;border-bottom:1px solid #DAD4C8;background:rgba(255,255,255,.86)}

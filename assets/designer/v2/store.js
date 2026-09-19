@@ -235,6 +235,53 @@
       });
     }
 
+    function autoDistributeCloset(widths, target) {
+      target = target || {};
+      if (!Array.isArray(widths) || widths.length === 0 || widths.some(function (width) {
+        return !Number.isInteger(width) || width <= 0;
+      })) fail("CLOSET_DISTRIBUTION", "La distribución automática no es válida.");
+      return transact("autoDistributeCloset", function (configuration) {
+        if (configuration.type !== "closet") fail("DESIGN_TYPE", "La distribución automática solo está disponible para clósets.");
+        const run = configuration.layout.runs.find(function (item) { return item.id === (target.runId || "closet-main"); }) || configuration.layout.runs[0];
+        const zoneId = target.zone || "body";
+        const zone = run?.zones.find(function (item) { return item.id === zoneId; });
+        if (!run || !zone) fail("ZONE_REFERENCE", "No existe una zona de cuerpos para distribuir.");
+        const closetProfile = configuration.standards.snapshot.closet;
+        if (widths.some(function (width) {
+          return width < closetProfile.minBodyWidthMm || width > closetProfile.maxBodyWidthMm;
+        })) fail("CLOSET_DISTRIBUTION_RANGE", "Los anchos automáticos deben respetar los límites del perfil técnico.");
+        const available = run.lengthMm - zone.startReserveMm - zone.endReserveMm;
+        if (widths.reduce(function (sum, width) { return sum + width; }, 0) !== available) {
+          fail("CLOSET_DISTRIBUTION_TOTAL", "La distribución debe ocupar exactamente el ancho disponible.");
+        }
+        const modules = group(configuration, run.id, zoneId);
+        if (modules.some(function (item) { return item.locks.width; })) {
+          fail("WIDTH_LOCKED", "Desbloquea los anchos antes de aplicar la distribución automática.");
+        }
+        while (modules.length > widths.length) {
+          const removed = modules.pop();
+          configuration.modules.splice(configuration.modules.findIndex(function (item) { return item.id === removed.id; }), 1);
+        }
+        while (modules.length < widths.length) {
+          let id = idFactory("module");
+          while (configuration.modules.some(function (item) { return item.id === id; })) id = idFactory("module");
+          const created = {
+            id, runId: run.id, zone: zoneId, order: modules.length, type: "closet.open",
+            dimensions: {
+              widthMm: widths[modules.length],
+              heightMm: configuration.dimensions.heightMm,
+              depthMm: configuration.dimensions.depthMm,
+            },
+            components: [], options: {}, locks: { width: false },
+          };
+          configuration.modules.push(created);
+          modules.push(created);
+        }
+        modules.forEach(function (item, index) { item.dimensions.widthMm = widths[index]; item.order = index; });
+        return modules.map(function (item) { return item.id; });
+      });
+    }
+
     function subscribe(callback) {
       if (typeof callback !== "function") throw new TypeError("subscribe requiere una función.");
       subscribers.add(callback);
@@ -257,6 +304,7 @@
       addComponent,
       removeComponent,
       updateComponent,
+      autoDistributeCloset,
     });
   }
 

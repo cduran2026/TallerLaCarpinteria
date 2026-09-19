@@ -8,6 +8,7 @@ const root = path.resolve(__dirname, '../..');
 const harness = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
 <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/maestro/maestro.css">
 <script src="/assets/designer/v2/schema.js"></script><script src="/assets/designer/v2/profiles.js"></script>
+<script src="/assets/designer/v2/closet-distribution.js"></script>
 <script src="/assets/designer/v2/occupancy.js"></script><script src="/assets/designer/v2/validation.js"></script>
 <script src="/assets/designer/v2/store.js"></script><script src="/assets/designer/v2/fixtures.js"></script></head>
 <body class="maestro maestro-authenticated"><main class="maestro-main"><div id="host" class="closet-v2-host"></div></main>
@@ -87,8 +88,10 @@ window.abort = new AbortController(); window.editorReady = mountClosetV2(documen
     await page.getByLabel('Ancho del cuerpo en milímetros').press('Enter');
     assert.equal(await page.locator('.occupancy-track').getAttribute('data-status'), 'deficit');
     assert.equal((await page.evaluate(() => editorApi.getStatus())).isComplete, false);
-    await page.getByLabel('Ancho del cuerpo en milímetros').fill('600');
-    await page.getByLabel('Ancho del cuerpo en milímetros').press('Enter');
+    await page.getByRole('button', { name: 'Distribución automática' }).click();
+    assert.equal(await page.locator('.occupancy-track').getAttribute('data-status'), 'exact');
+    assert.equal((await page.evaluate(() => editorApi.getStatus())).canGenerateTechnicalOutputs, true);
+    assert.deepEqual((await page.evaluate(() => editorApi.getState().configuration.modules.map(item => item.dimensions.widthMm))), [600, 600, 600]);
 
     const shelves = page.getByLabel('Activar Repisas');
     if (!(await shelves.isChecked())) await shelves.check();
