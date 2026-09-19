@@ -111,6 +111,11 @@ function testStoreOperations() {
 
   store.setModuleWidthLocked("straight-base-drawers", true);
   assert.equal(findModule(store.getState(), "straight-base-drawers").locks.width, true);
+  const beforeLockedWidth = store.getState();
+  assert.throws(() => store.changeModuleWidth("straight-base-drawers", 550),
+    (error) => error.code === "WIDTH_LOCKED");
+  assert.deepEqual(store.getState(), beforeLockedWidth, "locked width rejection is atomic");
+  store.setModuleWidthLocked("straight-base-drawers", false);
 
   store.addModule({
     id: "straight-base-filler",
@@ -142,6 +147,12 @@ function testStoreOperations() {
   };
   store.addComponent("straight-base-oven", component);
   assert.equal(findModule(store.getState(), "straight-base-oven").components.length, 1);
+  store.updateComponent("straight-base-oven", "oven-door-test", {
+    quantity: { mode: "manual", recommended: 1, applied: 2, resolved: 2 },
+    options: { opening: "swing" },
+  });
+  assert.equal(findModule(store.getState(), "straight-base-oven").components[0].quantity.resolved, 2);
+  assert.equal(findModule(store.getState(), "straight-base-oven").components[0].options.opening, "swing");
   store.removeComponent("straight-base-oven", "oven-door-test");
   assert.equal(findModule(store.getState(), "straight-base-oven").components.length, 0);
 

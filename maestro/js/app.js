@@ -9,7 +9,8 @@ import { projects } from './views/projects.js';
 import { clients } from './views/clients.js';
 import { projectForm } from './views/project-form.js';
 import { projectDetail } from './views/project-detail.js';
-import { designEditor } from './views/design-editor.js';
+import { designWorkspace } from './views/design-workspace.js';
+import { production } from './views/production.js';
 
 const root = document.querySelector('#app');
 const nav = document.querySelector('#app-nav');
@@ -40,6 +41,7 @@ function updateShell(path, query) {
   else if (path === '/proyectos') { section = 'projects'; eyebrow = 'Cartera de trabajo'; title = 'Proyectos'; }
   else if (path === '/proyectos/nuevo') { section = 'projects'; eyebrow = 'Proyectos'; title = 'Nuevo proyecto'; }
   else if (path.startsWith('/proyectos/') && path.includes('/disenos/')) { section = 'designs'; eyebrow = 'Diseñador'; title = 'Diseño del proyecto'; }
+  if (path === '/produccion' || path.endsWith('/produccion')) { section = 'production'; eyebrow = 'Producción'; title = 'Despiece y Corte'; }
   else if (path.startsWith('/proyectos/')) { section = 'projects'; eyebrow = 'Proyectos'; title = 'Ficha de proyecto'; }
   else if (query?.get('seccion') === 'disenos') { section = 'designs'; eyebrow = 'Espacio de trabajo'; title = 'Diseños'; }
   contextEyebrow.textContent = eyebrow;
@@ -106,8 +108,10 @@ async function render(force = false) {
     else if (path === '/proyectos') view = await projects(workshop, query);
     else if (path === '/clientes') view = await clients(workshop, query);
     else if (path === '/proyectos/nuevo') view = await projectForm(workshop, query);
+    else if (path === '/produccion') view = await production(workshop);
+    else if (parts.length === 5 && parts[0] === 'proyectos' && parts[2] === 'disenos' && parts[4] === 'produccion') view = await production(workshop, parts[1], parts[3]);
     else if (parts.length === 2 && parts[0] === 'proyectos') view = await projectDetail(workshop, parts[1]);
-    else if (parts.length === 4 && parts[0] === 'proyectos' && parts[2] === 'disenos') view = await designEditor(workshop, parts[1], parts[3]);
+    else if (parts.length === 4 && parts[0] === 'proyectos' && parts[2] === 'disenos') view = await designWorkspace(workshop, parts[1], parts[3]);
     else view = { element: h('p', { class: 'notice' }, 'Página no encontrada.') };
     if (ticket !== generation) { view.dispose?.(); return; }
     attach(view);

@@ -12,6 +12,16 @@
   <link rel="stylesheet" href="../styles.css">
   <link rel="stylesheet" href="maestro.css">
   <script src="../assets/designer/serialization.js" defer></script>
+  <script src="../assets/designer/v2/schema.js" defer></script>
+  <script src="../assets/designer/v2/profiles.js" defer></script>
+  <script src="../assets/designer/v2/occupancy.js" defer></script>
+  <script src="../assets/designer/v2/validation.js" defer></script>
+  <script src="../assets/designer/v2/store.js" defer></script>
+  <script src="../assets/designer/v2/fixtures.js" defer></script>
+  <script src="../assets/production/schema.js" defer></script>
+  <script src="../assets/production/profiles.js" defer></script>
+  <script src="../assets/production/piece-generator.js" defer></script>
+  <script src="../assets/production/cut-optimizer.js" defer></script>
   <script type="module" src="js/app.js"></script>
 </head>
 <body class="maestro">
@@ -42,6 +52,11 @@
         <a href="#/dashboard?seccion=disenos" data-nav="designs">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m4 7 8-4 8 4-8 4-8-4Zm0 5 8 4 8-4M4 17l8 4 8-4"/></svg>
           <span>Diseños</span>
+        </a>
+        <span class="nav-label nav-label-section">Producción</span>
+        <a href="#/produccion" data-nav="production">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 4h16v16H4V4Zm4 0v16M4 9h4m0 5H4m4 3H4m9-13v7h7m-7 4h7"/></svg>
+          <span>Despiece y Corte</span>
         </a>
         <span class="nav-item-disabled" aria-disabled="true">
           <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7ZM19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-2.83 2.83-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1.03 1.56V21h-4v-.08a1.7 1.7 0 0 0-1.03-1.56 1.7 1.7 0 0 0-1.88.34l-.06.06-2.83-2.83.06-.06A1.7 1.7 0 0 0 4.6 15 1.7 1.7 0 0 0 3.07 14H3v-4h.08A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.88l-.06-.06 2.83-2.83.06.06A1.7 1.7 0 0 0 8.97 4 1.7 1.7 0 0 0 10 2.44V2h4v.44A1.7 1.7 0 0 0 15.03 4a1.7 1.7 0 0 0 1.88-.34l.06-.06 2.83 2.83-.06.06A1.7 1.7 0 0 0 19.4 9 1.7 1.7 0 0 0 20.93 10H21v4h-.08A1.7 1.7 0 0 0 19.4 15Z"/></svg>

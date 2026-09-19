@@ -3,7 +3,7 @@ import { getProject } from '../repositories/projects.js';
 import { getDesign, decodeDesign, saveDesign } from '../repositories/designs.js';
 import { mountDesigner } from '../designer-bridge.js';
 import { navigate } from '../router.js';
-export async function designEditor(workshop, projectId, designId) {
+export async function designEditor(workshop, projectId, designId, options = {}) {
   const project = await getProject(workshop.id, projectId);
   const row = designId === 'nuevo' ? null : await getDesign(workshop.id, projectId, designId);
   const configuration = row ? decodeDesign(row) : null;
@@ -40,7 +40,7 @@ export async function designEditor(workshop, projectId, designId) {
   return { element,
     mount: async () => {
       try {
-        api = await mountDesigner(frame, configuration, abort.signal);
+        api = await mountDesigner(frame, configuration, abort.signal, options);
         unsubscribe = api.subscribe(changed);
         save.disabled = false;
         status.textContent = row ? 'Diseño recuperado.' : 'Configura Cocina o Clóset y guarda el diseño.';

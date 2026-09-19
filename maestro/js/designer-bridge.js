@@ -1,6 +1,6 @@
 // Reuse the authoritative public controls and Fase 1 scripts, without duplicating them.
 // One iframe = one existing controller/renderer lifecycle. Removing it releases the viewer.
-export async function mountDesigner(frame, configuration, signal) {
+export async function mountDesigner(frame, configuration, signal, options = {}) {
   const root = new URL('../../', import.meta.url);
   const response = await fetch(new URL('index.html', root), { signal });
   if (!response.ok) throw new Error('No se pudo cargar el formulario del diseñador existente.');
@@ -24,6 +24,12 @@ export async function mountDesigner(frame, configuration, signal) {
   const api = frame.contentWindow.TALLER_CONFIGURATION;
   if (!api) throw new Error('No se pudo inicializar el controlador de Fase 1.');
   if (configuration) api.loadState(configuration);
+  if (options.lockType) {
+    const state = api.getState();
+    state.type = options.lockType;
+    api.loadState(state);
+    frame.contentDocument.querySelector('.fc-type')?.closest('.fc-group')?.remove();
+  }
   // The existing viewer must start AFTER DOMContentLoaded initializes the controller.
   const loadScript = src => new Promise((resolve, reject) => {
     if (signal.aborted) { reject(new DOMException('Cancelado', 'AbortError')); return; }

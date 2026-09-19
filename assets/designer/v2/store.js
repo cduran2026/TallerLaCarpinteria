@@ -180,7 +180,9 @@
     function changeModuleWidth(moduleId, widthMm) {
       if (!Number.isInteger(widthMm) || widthMm <= 0) fail("MODULE_WIDTH", "El ancho debe ser un entero positivo.");
       return transact("changeModuleWidth", function (configuration) {
-        findModule(configuration, moduleId).dimensions.widthMm = widthMm;
+        const module = findModule(configuration, moduleId);
+        if (module.locks.width) fail("WIDTH_LOCKED", "El ancho del módulo está bloqueado.");
+        module.dimensions.widthMm = widthMm;
         return moduleId;
       });
     }
@@ -220,6 +222,19 @@
       });
     }
 
+    function updateComponent(moduleId, componentId, changes) {
+      if (!schema.isPlainObject(changes)) fail("COMPONENT_CHANGES", "Se requieren cambios para el componente.");
+      const input = schema.clone(changes);
+      delete input.id;
+      return transact("updateComponent", function (configuration) {
+        const module = findModule(configuration, moduleId);
+        const index = module.components.findIndex(function (item) { return item.id === componentId; });
+        if (index < 0) fail("COMPONENT_NOT_FOUND", "No existe el componente " + componentId + ".");
+        module.components[index] = Object.assign({}, module.components[index], input, { id: componentId });
+        return componentId;
+      });
+    }
+
     function subscribe(callback) {
       if (typeof callback !== "function") throw new TypeError("subscribe requiere una función.");
       subscribers.add(callback);
@@ -241,6 +256,7 @@
       setModuleWidthLocked,
       addComponent,
       removeComponent,
+      updateComponent,
     });
   }
 

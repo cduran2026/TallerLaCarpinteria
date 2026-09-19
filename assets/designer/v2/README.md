@@ -50,6 +50,10 @@ createDesignStore(envelope, { idFactory }) ofrece:
 - addModule, removeModule, duplicateModule, moveModule;
 - changeModuleWidth, setModuleWidthLocked;
 - addComponent, removeComponent.
+- updateComponent para modificar cantidades y opciones sin estados intermedios.
+
+Un ancho bloqueado rechaza changeModuleWidth con WIDTH_LOCKED hasta que el módulo
+vuelva a desbloquearse.
 
 Cada operación trabaja sobre una copia. Si rompe el contrato o las referencias, no
 publica ningún cambio. Una operación correcta genera una sola notificación.
