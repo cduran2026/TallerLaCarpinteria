@@ -11,6 +11,7 @@ import { projectForm } from './views/project-form.js';
 import { projectDetail } from './views/project-detail.js';
 import { designWorkspace } from './views/design-workspace.js';
 import { production } from './views/production.js';
+import { contentStudio } from './views/content-studio.js';
 
 const root = document.querySelector('#app');
 const nav = document.querySelector('#app-nav');
@@ -42,6 +43,7 @@ function updateShell(path, query) {
   else if (path === '/proyectos/nuevo') { section = 'projects'; eyebrow = 'Proyectos'; title = 'Nuevo proyecto'; }
   else if (path.startsWith('/proyectos/') && path.includes('/disenos/')) { section = 'designs'; eyebrow = 'Diseñador'; title = 'Diseño del proyecto'; }
   if (path === '/produccion' || path.endsWith('/produccion')) { section = 'production'; eyebrow = 'Producción'; title = 'Despiece y Corte'; }
+  else if (path === '/marketing/estudio') { section = 'marketing'; eyebrow = 'Marketing'; title = 'Estudio de Contenido'; }
   else if (path.startsWith('/proyectos/')) { section = 'projects'; eyebrow = 'Proyectos'; title = 'Ficha de proyecto'; }
   else if (query?.get('seccion') === 'disenos') { section = 'designs'; eyebrow = 'Espacio de trabajo'; title = 'Diseños'; }
   contextEyebrow.textContent = eyebrow;
@@ -109,6 +111,7 @@ async function render(force = false) {
     else if (path === '/clientes') view = await clients(workshop, query);
     else if (path === '/proyectos/nuevo') view = await projectForm(workshop, query);
     else if (path === '/produccion') view = await production(workshop);
+    else if (path === '/marketing/estudio') view = await contentStudio(workshop, query);
     else if (parts.length === 5 && parts[0] === 'proyectos' && parts[2] === 'disenos' && parts[4] === 'produccion') view = await production(workshop, parts[1], parts[3]);
     else if (parts.length === 2 && parts[0] === 'proyectos') view = await projectDetail(workshop, parts[1]);
     else if (parts.length === 4 && parts[0] === 'proyectos' && parts[2] === 'disenos') view = await designWorkspace(workshop, parts[1], parts[3]);

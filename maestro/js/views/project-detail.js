@@ -56,6 +56,7 @@ export async function projectDetail(workshop, id) {
         h('h1', {}, project.name),
         h('p', {}, client.name || 'Cliente pendiente', ' · ', project.site_commune || 'Ubicación pendiente')),
       h('div', { class: 'project-hero-actions' },
+        h('a', { class: 'button button-secondary', href: `#/marketing/estudio?project=${id}` }, 'Crear contenido'),
         h('a', { class: 'button button-primary', href: `#/proyectos/${id}/disenos/nuevo` }, 'Nuevo diseño'))),
     h('div', { class: 'project-overview-grid' },
       h('section', { class: 'workspace-panel project-summary' },
