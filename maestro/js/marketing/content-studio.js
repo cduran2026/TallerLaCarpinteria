@@ -1,4 +1,5 @@
 import { h } from '../ui.js';
+import { publishInstagramStory } from '../repositories/social-connections.js';
 
 const STAGES = { before: 'Antes', during: 'Durante', after: 'Después', result: 'Resultado final', detail: 'Detalle', video: 'Video' };
 const CTA_OPTIONS = ['Cotiza con nosotros', 'Escríbenos por WhatsApp', 'Agenda una visita', 'Conoce nuestro trabajo'];
@@ -19,7 +20,7 @@ function projectDescription(project, types, showCommune) {
   return showCommune && project?.site_commune ? `${base} en ${project.site_commune}.` : `${base}.`;
 }
 
-export function createContentStudio({ workshop, projects = [], designTypes = {}, initialProjectId = null }) {
+export function createContentStudio({ workshop, projects = [], designTypes = {}, initialProjectId = null, instagramConnection = null, canPublishInstagram = false }) {
   const profiles = window.TALLER_CONTENT_PROFILES;
   const templates = window.TALLER_CONTENT_TEMPLATES;
   const renderer = window.TALLER_CONTENT_RENDERER;
@@ -40,6 +41,8 @@ export function createContentStudio({ workshop, projects = [], designTypes = {},
   const feedback = h('p', { class: 'studio-feedback', role: 'status' });
   const download = h('button', { type: 'button', class: 'button button-primary' }, 'Descargar imagen');
   const generate = h('button', { type: 'button', class: 'button button-secondary' }, 'Generar imagen');
+  const publishInstagram = instagramConnection?.status === 'connected' && canPublishInstagram
+    ? h('button', { type: 'button', class: 'button button-instagram' }, 'Publicar en Instagram') : null;
   const titleInput = h('input', { type: 'text', maxlength: 90 });
   const descriptionInput = h('textarea', { rows: 4, maxlength: 360 });
   const ctaSelect = h('select', {}, CTA_OPTIONS.map(value => option(value, value)), option('custom', 'CTA personalizado'));
@@ -173,6 +176,18 @@ export function createContentStudio({ workshop, projects = [], designTypes = {},
       feedback.textContent = 'Imagen descargada. Revisa tu carpeta de descargas.';
     } catch (error) { feedback.textContent = error.message || 'No fue posible descargar la imagen.'; }
   });
+  publishInstagram?.addEventListener('click', async () => {
+    const composition = store.getComposition();
+    if (!composition.readiness.isReady) { feedback.textContent = 'Completa el contenido requerido antes de publicar.'; return; }
+    if (composition.format.width / composition.format.height > .7) { feedback.textContent = 'Selecciona Instagram Story o Reel para la prueba vertical.'; return; }
+    if (!window.confirm(`¿Publicar esta imagen como Story de prueba en @${instagramConnection.username}? La publicación será visible en Instagram.`)) return;
+    publishInstagram.disabled = true; feedback.textContent = 'Publicando Story de prueba mediante Meta…';
+    try {
+      await renderPreview(); const result = await publishInstagramStory(workshop.id, canvas.toDataURL('image/jpeg', .9));
+      feedback.textContent = `Story publicada en @${result.username}. ID: ${result.mediaId} · ${new Date(result.publishedAt).toLocaleString('es-CL')}`;
+    } catch (error) { feedback.textContent = error.message || 'No fue posible publicar la Story.'; }
+    finally { publishInstagram.disabled = false; }
+  });
 
   const element = h('section', { class: 'content-studio-page' },
     h('header', { class: 'studio-hero' }, h('div', {}, h('span', { class: 'section-kicker' }, 'Marketing'), h('h1', {}, 'Estudio de Contenido'), h('p', {}, 'Convierte el trabajo del taller en contenido listo para publicar, con una identidad consistente.')), h('span', { class: 'studio-beta' }, 'Beta')),
@@ -184,7 +199,7 @@ export function createContentStudio({ workshop, projects = [], designTypes = {},
         mediaList),
       h('main', { class: 'studio-panel studio-preview-panel' }, h('header', {}, h('span', {}, '02'), h('div', {}, h('h2', {}, 'Vista previa'), h('p', {}, 'La composición se actualiza en tiempo real.'))),
         h('div', { class: 'studio-preview-meta' }, readiness, dimensions), canvasFrame,
-        h('div', { class: 'studio-export-actions' }, generate, download), feedback,
+        h('div', { class: 'studio-export-actions' }, generate, download, publishInstagram), feedback,
         h('div', { class: 'studio-caption' }, h('span', {}, 'Texto para acompañar'), h('p', {}, 'El título, descripción, llamado a la acción y hashtags quedan listos para copiar junto con la imagen.'))),
       h('aside', { class: 'studio-panel studio-customize-panel' }, h('header', {}, h('span', {}, '03'), h('div', {}, h('h2', {}, 'Personalizar'), h('p', {}, 'Plantilla, formato, texto e identidad.'))),
         h('section', { class: 'studio-control-section' }, h('h3', {}, 'Plantilla'), templateGrid),
