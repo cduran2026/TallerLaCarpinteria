@@ -1,8 +1,11 @@
 import { adminClient, sha256 } from '../_shared/security.ts';
 import { INSTAGRAM_SCOPES, graphRequest } from '../_shared/instagram.ts';
 import { requireEnv } from '../_shared/http.ts';
-function finish(status: string, detail = '') { const target = new URL('/maestro/', requireEnv('APP_URL')); target.hash = `/configuracion/integraciones/instagram?instagram=${encodeURIComponent(status)}${detail ? `&detail=${encodeURIComponent(detail)}` : ''}`; return Response.redirect(target.toString(), 302); }
+import { instagramReturnUrl } from '../_shared/redirect.ts';
+function finish(status: string, detail = '') { return Response.redirect(instagramReturnUrl(requireEnv('APP_URL'), requireEnv('APP_ALLOWED_ORIGINS'), status, detail), 302); }
 Deno.serve(async request => {
+  try { instagramReturnUrl(requireEnv('APP_URL'), requireEnv('APP_ALLOWED_ORIGINS'), 'error'); }
+  catch { return new Response('La URL de retorno OAuth no está configurada correctamente.', { status: 500 }); }
   const url = new URL(request.url); const code = url.searchParams.get('code'); const state = url.searchParams.get('state');
   if (url.searchParams.get('error')) return finish('error', url.searchParams.get('error_description') || 'Autorización cancelada.');
   if (!code || !state) return finish('error', 'Respuesta OAuth incompleta.');

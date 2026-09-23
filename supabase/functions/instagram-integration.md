@@ -36,11 +36,18 @@ META_APP_ID
 META_APP_SECRET
 META_API_VERSION
 META_REDIRECT_URI=https://jnzlultjyrtrkziqeocy.supabase.co/functions/v1/instagram-auth-callback
-APP_URL=https://DOMINIO-PUBLICADO
-APP_ALLOWED_ORIGINS=https://DOMINIO-PUBLICADO,http://127.0.0.1:4173
+APP_URL=https://cduran2026.github.io/TallerLaCarpinteria/maestro/
+APP_ALLOWED_ORIGINS=https://cduran2026.github.io,http://127.0.0.1:4173
 ```
 
+`APP_URL` es la URL completa del Modo Maestro. El callback conserva su ruta, normaliza la barra final y exige que su origen figure en `APP_ALLOWED_ORIGINS`. Al cambiar de dominio basta actualizar esos valores; la ruta no está fijada en el código. Si falta cualquier configuración OAuth, `instagram-auth-start` responde con error antes de crear estados o conexiones.
+
 `SUPABASE_URL`, `SUPABASE_ANON_KEY` y `SUPABASE_SERVICE_ROLE_KEY` son secretos administrados por el entorno de Edge Functions. Nunca deben copiarse al frontend. No crear archivos `.env` versionados.
+
+## Pruebas SQL
+
+- `supabase/tests/instagram_isolation.sql`: **SOLO LOCAL / TEST PROJECT**. Ejecutar con `pwsh -File supabase/tests/run-instagram-local.ps1` después de iniciar Supabase local y aplicar allí las migraciones. El runner comprueba la instancia local y ejecuta `psql` únicamente dentro de su contenedor Docker; la prueba exige una marca de sesión y revierte los fixtures.
+- `supabase/tests/instagram_cloud_smoke.sql`: consulta de solo lectura para Cloud después de aplicar 005. Comprueba tablas, RLS, permisos, funciones, restricción compuesta, Vault y bucket; no crea usuarios ni datos. Ejecutar con `npx supabase db query --linked --file supabase/tests/instagram_cloud_smoke.sql`. No sustituye la prueba de aislamiento con dos identidades, que permanece en local.
 
 ## Orden de aplicación posterior a revisión
 

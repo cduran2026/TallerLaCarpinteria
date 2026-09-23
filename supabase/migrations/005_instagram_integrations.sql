@@ -18,14 +18,15 @@ create table public.social_connections (
   created_by uuid not null references public.profiles(id),
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now(),
-  unique (workshop_id, provider)
+  unique (workshop_id, provider),
+  unique (id, workshop_id)
 );
 create index social_connections_workshop_idx on public.social_connections(workshop_id);
 
 create table public.social_publications (
   id uuid primary key default gen_random_uuid(),
   workshop_id uuid not null references public.workshops(id) on delete cascade,
-  connection_id uuid not null references public.social_connections(id) on delete cascade,
+  connection_id uuid not null,
   provider text not null check (provider in ('instagram')),
   content_type text not null check (content_type in ('story_image')),
   status text not null check (status in ('processing', 'published', 'error')),
@@ -34,7 +35,10 @@ create table public.social_publications (
   error_message text,
   created_by uuid not null references public.profiles(id),
   created_at timestamptz not null default now(),
-  published_at timestamptz
+  published_at timestamptz,
+  constraint social_publications_connection_workshop_fk
+    foreign key (connection_id, workshop_id)
+    references public.social_connections(id, workshop_id) on delete cascade
 );
 create index social_publications_workshop_idx on public.social_publications(workshop_id, created_at desc);
 
@@ -95,6 +99,8 @@ begin
     update private.social_oauth_states s set used_at = now()
       where s.state_hash = server_consume_instagram_oauth_state.state_hash
         and s.used_at is null and s.expires_at > now()
+        and exists (select 1 from public.workshop_members m
+          where m.workshop_id = s.workshop_id and m.user_id = s.user_id and m.role = 'admin')
       returning s.workshop_id, s.user_id;
 end $$;
 
