@@ -7,7 +7,7 @@ const root = path.resolve(__dirname, '../..');
 
 const harness = `<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:,">
 <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/maestro/maestro.css">
-<script src="/assets/designer/v2/schema.js"></script><script src="/assets/designer/v2/profiles.js"></script>
+<script src="/assets/designer/v2/schema.js"></script><script src="/assets/designer/v2/profiles.js"></script><script src="/assets/designer/v2/closet-distribution.js"></script>
 <script src="/assets/designer/v2/occupancy.js"></script><script src="/assets/designer/v2/validation.js"></script><script src="/assets/designer/v2/fixtures.js"></script>
 <script src="/assets/production/schema.js"></script><script src="/assets/production/profiles.js"></script>
 <script src="/assets/production/piece-generator.js"></script><script src="/assets/production/cut-optimizer.js"></script></head>
