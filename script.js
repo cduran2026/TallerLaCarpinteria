@@ -57,11 +57,31 @@ document.addEventListener("DOMContentLoaded", () => {
     button.classList.add("active");
     cards.forEach((card) => card.classList.toggle("hidden", button.dataset.filter !== "todos" && card.dataset.category !== button.dataset.filter));
   }));
+  // La galería y el asistente llevan al único cotizador existente.
+  let selectedGalleryProject = "";
+  document.querySelectorAll('input[name="fcType"]').forEach((input) => input.addEventListener("change", () => { selectedGalleryProject = ""; }));
+  const selectProjectType = (type, source) => {
+    const input = document.querySelector('input[name="fcType"][value="' + type + '"]');
+    if (input && !input.checked) {
+      input.checked = true;
+      input.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+    document.querySelector("#cotizador")?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+    track("cotizador_navegacion", { type, source });
+  };
   document.querySelectorAll(".project-whatsapp").forEach((button) => button.addEventListener("click", () => {
-    const project = button.dataset.project || "un proyecto a medida";
-    track("whatsapp_general", { source: "proyecto", project });
-    window.open(waURL(`Hola, quiero cotizar el proyecto "${project}". ¿Me pueden orientar con medidas, materiales y valores?`), "_blank", "noopener,noreferrer");
+    selectProjectType(button.dataset.type || "kitchen", "galeria");
+    selectedGalleryProject = button.dataset.project || "";
   }));
+
+  // Interfaz pública mínima para el asistente; el estado y precio siguen en el cotizador.
+  window.TALLER_PUBLIC_ACTIONS = Object.freeze({
+    selectProjectType,
+    openWhatsApp: (message, source = "asistente") => {
+      track("whatsapp_general", { source });
+      window.open(waURL(message), "_blank", "noopener,noreferrer");
+    },
+  });
   document.querySelectorAll("[data-compare]").forEach((compare) => {
     const slider = compare.querySelector('input[type="range"]');
     if (!slider) return;
@@ -189,6 +209,7 @@ document.addEventListener("DOMContentLoaded", () => {
         "Hola, realicé una estimación en el sitio de Taller La Carpintería:",
         "",
         `Proyecto: ${projectLabel}`,
+        selectedGalleryProject ? `Referencia de la galería: ${selectedGalleryProject}` : "",
         `Dimensiones: ${budget.dimensionsText}`,
         budget.extras ? `Configuración: ${budget.extras}` : "",
         `Terminación: ${budget.finish}`,
@@ -203,7 +224,7 @@ document.addEventListener("DOMContentLoaded", () => {
       window.open(waURL(lines.join("\n")), "_blank", "noopener,noreferrer");
     });
 
-    document.querySelectorAll(".direct-whatsapp-link,.floating-whatsapp,.contact-whatsapp").forEach((link) => link.addEventListener("click", () => track("whatsapp_general", { source: link.className })));
+    document.querySelectorAll(".direct-whatsapp-link,.contact-whatsapp").forEach((link) => link.addEventListener("click", () => track("whatsapp_general", { source: link.className })));
 
     calculate();
   }

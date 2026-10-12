@@ -5,7 +5,11 @@ const path = require('node:path');
 const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
 
 const dist = path.resolve(__dirname, '../../dist');
-const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg' };
+const mime = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
+};
 
 (async () => {
   const server = http.createServer((request, response) => {
@@ -20,49 +24,79 @@ const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; cha
     });
   });
   await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-  const origin = `http://127.0.0.1:${server.address().port}`;
+  const origin = 'http://127.0.0.1:' + server.address().port;
   let browser;
   try {
     browser = await chromium.launch({ headless: true, ...(process.env.BROWSER_CHANNEL ? { channel: process.env.BROWSER_CHANNEL } : {}) });
-    const page = await browser.newPage();
+    const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const missing = [];
+    const errors = [];
     page.on('response', response => {
-      if (response.url().startsWith(origin) && response.status() >= 400) missing.push(response.url());
+      if (response.url().startsWith(origin) && response.status() >= 400) missing.push(response.status() + ' ' + response.url());
+    });
+    page.on('pageerror', error => errors.push(error.message));
+    await page.addInitScript(() => {
+      window.__openedLinks = [];
+      window.open = (url) => { window.__openedLinks.push(String(url)); return null; };
     });
     await page.goto(origin + '/', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => Boolean(window.TALLER_CONFIGURATION));
-    assert.ok(await page.locator('#furniture-canvas').count());
+    assert.equal(await page.locator('a[href^="maestro/"]').count(), 0);
+    assert.equal(await page.locator('.project-card').count(), 3);
+    assert.equal(await page.locator('.process-media img').count(), 3);
+    assert.equal(await page.locator('.header-social a').count(), 2);
+    assert.equal(await page.locator('.mobile-social a').count(), 2);
+    await page.locator('.filter-button[data-filter="closets"]').click();
+    assert.equal(await page.locator('.project-card:not(.hidden)').count(), 1);
+    await page.locator('.filter-button[data-filter="todos"]').click();
+    await page.locator('.project-whatsapp[data-type="closet"]').click();
+    assert.equal(await page.locator('input[name="fcType"][value="closet"]').isChecked(), true);
+
     await page.locator('#furniture-canvas').scrollIntoViewIfNeeded();
-    await page.waitForFunction(() => Boolean(window.THREE && document.querySelector('#furniture-readout')?.textContent));
-    for (const width of [390, 768, 1440]) {
-      await page.setViewportSize({ width, height: 900 });
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `scroll público ${width}`);
-    }
+    await page.waitForFunction(() => Boolean(window.TALLER_CONFIGURATION && window.THREE));
     const state = await page.evaluate(() => {
       const original = TALLER_CONFIGURATION.getState();
-      TALLER_CONFIGURATION.loadState({ ...original, type: 'closet', width: 240, height: 240 });
+      const closet = { ...original, type: 'closet', width: 240, height: 240 };
+      TALLER_CONFIGURATION.loadState(closet);
       const loaded = TALLER_CONFIGURATION.getState();
-      TALLER_CONFIGURATION.loadState(original);
-      return loaded;
+      TALLER_CONFIGURATION.loadState({ ...original, type: 'kitchen', width: 280 });
+      const kitchen = TALLER_CONFIGURATION.getState();
+      return { loaded, kitchen };
     });
-    assert.equal(state.type, 'closet');
-    assert.equal(state.width, 240);
-    await page.goto(origin + '/maestro/#/login', { waitUntil: 'domcontentloaded' });
-    await page.waitForFunction(() => Boolean(window.TALLER_CONTENT_RENDERER && window.TALLER_DESIGNER_V2_STORE));
-    const studio = await page.evaluate(async () => {
-      const store = TALLER_CONTENT_STORE.createContentStore();
-      const canvas = document.createElement('canvas');
-      const result = await TALLER_CONTENT_RENDERER.renderComposition(canvas, store.getComposition());
-      return { width: result.width, height: result.height, templateId: result.templateId };
-    });
-    assert.deepEqual(studio, { width: 1080, height: 1080, templateId: 'finished-work' });
-    for (const width of [390, 768, 1440]) {
+    assert.equal(state.loaded.type, 'closet');
+    assert.equal(state.loaded.width, 240);
+    assert.equal(state.kitchen.type, 'kitchen');
+    assert.equal(state.kitchen.width, 280);
+    assert.match(await page.locator('#price-range').innerText(), /\$/);
+    await page.locator('#send-budget-whatsapp').click();
+    assert.ok(await page.evaluate(() => window.__openedLinks.some(link =>
+      link.startsWith('https://wa.me/') && decodeURIComponent(link).includes('Proyecto: Cocina a medida')
+    )), 'El cotizador genera el mensaje sin enviarlo');
+
+    await page.locator('[data-assistant-trigger]').click();
+    assert.equal(await page.locator('#assistant-panel').isVisible(), true);
+    assert.ok(await page.locator('[data-assistant-replies] .assistant-reply-chip').count() <= 2);
+    await page.locator('#assistant-question').fill('pneumotórax cuántico');
+    await page.locator('#assistant-question').press('Enter');
+    assert.ok(await page.locator('[data-assistant-replies] .assistant-reply-chip').count() <= 2);
+    assert.ok(await page.locator('.assistant-message-user').count() > 0);
+    await page.locator('[data-assistant-replies] [data-action="questions"]').click();
+    assert.ok(await page.locator('[data-assistant-replies] .assistant-reply-chip').count() <= 2);
+    await page.locator('[data-assistant-minimize]').click();
+    assert.equal(await page.locator('#assistant-panel').isVisible(), false);
+
+    for (const width of [1440, 1024, 768, 430, 390, 360]) {
       await page.setViewportSize({ width, height: 900 });
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), `scroll Maestro ${width}`);
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Scroll horizontal a ' + width + 'px');
     }
+    await page.locator('.menu-toggle').click();
+    assert.equal(await page.locator('#mobile-nav').isVisible(), true);
+    assert.equal(await page.locator('#mobile-nav a[href*="instagram.com"]').count(), 1);
+    assert.equal(await page.locator('#mobile-nav a[href*="facebook.com"]').count(), 1);
     assert.deepEqual(missing, [], 'Recursos locales faltantes');
-    console.log('PASS: dist servido, web, Three.js/formulario V1, Core V2, render Estudio 1:1 y responsive.');
-    console.log('PENDIENTE: vistas autenticadas y guardado real requieren sesión/proyecto de pruebas.');
+    assert.deepEqual(errors, [], 'Errores JavaScript');
+    const maestro = await page.request.get(origin + '/maestro/');
+    assert.equal(maestro.status(), 404);
+    console.log('PASS: dist público, galería, redes, cotizador Cocina/Clóset, WhatsApp sin envío, asistente, móvil y ausencia de Maestro.');
   } finally {
     if (browser) await browser.close();
     await new Promise(resolve => server.close(resolve));

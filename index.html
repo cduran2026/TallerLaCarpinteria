@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="description" content="Diseño, fabricación e instalación de cocinas, clósets y muebles a medida en Santiago. Estima tu proyecto y solicita una evaluación sin compromiso.">
   <meta name="theme-color" content="#1C241E">
+  <meta name="robots" content="noindex,nofollow">
   <meta property="og:type" content="website">
   <meta property="og:locale" content="es_CL">
   <meta property="og:title" content="Muebles a Medida en Santiago | Taller La Carpintería">
   <meta property="og:description" content="Diseño, fabricación e instalación de mobiliario a medida. Estima tu proyecto en línea.">
-  <meta property="og:image" content="https://tallerlacarpinteria.cl/assets/fotos-reales/cocina-terminada-1.jpg">
-  <meta property="og:url" content="https://tallerlacarpinteria.cl/">
-  <link rel="canonical" href="https://tallerlacarpinteria.cl/">
   <title>Muebles a Medida en Santiago | Taller La Carpintería</title>
 
   <link rel="icon" href="assets/brand/logo.jpg" type="image/jpeg">
@@ -22,9 +20,7 @@
   <script src="assets/designer/serialization.js" defer></script>
   <script src="assets/designer/controller.js" defer></script>
   <script src="script.js" defer></script>
-  <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"LocalBusiness","name":"Taller La Carpintería","url":"https://tallerlacarpinteria.cl/","telephone":"+56 9 8808 5830","email":"contacto@lacarpinteriachile.cl","description":"Diseño, fabricación e instalación de muebles a medida en Santiago.","areaServed":"Santiago de Chile","address":{"@type":"PostalAddress","addressLocality":"Santiago","addressCountry":"CL"}}
-  </script>
+  <script type="module" src="assets/assistant/ui.mjs"></script>
 </head>
 
 <body>
@@ -33,182 +29,71 @@
 <header class="site-header">
   <div class="container nav-wrapper">
     <a class="brand" href="#inicio" aria-label="Taller La Carpintería, inicio">
-      <img src="assets/brand/logo.jpg" alt="Logo Taller La Carpintería" width="52" height="52">
-      <span class="brand-copy">
-        <strong>Taller La Carpintería</strong>
-        <small>Mobiliario a medida</small>
-      </span>
+      <img src="assets/brand/logo.jpg" alt="" width="52" height="52">
+      <span class="brand-copy"><strong>Taller La Carpintería</strong><small>Mobiliario a medida</small></span>
     </a>
-
     <nav class="desktop-nav" aria-label="Navegación principal">
-      <a href="#servicios">Servicios</a>
-      <a href="#nosotros">Nosotros</a>
-      <a href="#galeria">Galería</a>
-      <a href="#cotizador">Cotiza y visualiza</a>
-      <a href="#preguntas-frecuentes">Preguntas frecuentes</a>
-      <a href="maestro/">Modo Maestro</a>
+      <a href="#galeria">Trabajos reales</a><a href="#cotizador">Cotizador 3D</a>
+      <a href="#proceso">Cómo trabajamos</a><a href="#nosotros">El taller</a>
     </nav>
-
-    <button class="menu-toggle" type="button" aria-label="Abrir menú"
-            aria-controls="mobile-nav" aria-expanded="false">
-      <span></span><span></span><span></span>
-    </button>
+    <div class="header-social" role="group" aria-label="Redes sociales del taller">
+      <a href="https://www.instagram.com/tallerlacarpinteria/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Taller La Carpintería (abre en otra pestaña)"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="social-dot" cx="17.5" cy="6.5" r="1"/></svg></a>
+      <a href="https://www.facebook.com/tlc.santiago.2025" target="_blank" rel="noopener noreferrer" aria-label="Facebook de Taller La Carpintería (abre en otra pestaña)"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.1 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3-.1-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.4v2.2H8v3.2h2.7V21h3.4Z"/></svg></a>
+    </div>
+    <a class="button nav-quote" href="#cotizador">Cotizar mi proyecto <span aria-hidden="true">↗</span></a>
+    <button class="menu-toggle" type="button" aria-label="Abrir menú" aria-controls="mobile-nav" aria-expanded="false"><span></span><span></span><span></span></button>
   </div>
-
   <nav id="mobile-nav" class="mobile-nav" aria-label="Menú móvil" hidden>
-    <a href="#servicios">Servicios</a>
-    <a href="#nosotros">Nosotros</a>
-    <a href="#galeria">Galería</a>
-    <a href="#cotizador">Cotiza y visualiza</a>
-    <a href="#preguntas-frecuentes">Preguntas frecuentes</a>
-      <a href="maestro/">Modo Maestro</a>
+    <a href="#galeria">Trabajos reales</a><a href="#cotizador">Cotizador 3D</a>
+    <a href="#proceso">Cómo trabajamos</a><a href="#nosotros">El taller</a>
+    <a class="button button-primary" href="#cotizador">Cotizar mi proyecto</a>
+    <div class="mobile-social" role="group" aria-label="Redes sociales del taller"><span class="mobile-social-label">Síguenos</span>
+      <a href="https://www.instagram.com/tallerlacarpinteria/" target="_blank" rel="noopener noreferrer" aria-label="Instagram de Taller La Carpintería (abre en otra pestaña)"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle class="social-dot" cx="17.5" cy="6.5" r="1"/></svg></a>
+      <a href="https://www.facebook.com/tlc.santiago.2025" target="_blank" rel="noopener noreferrer" aria-label="Facebook de Taller La Carpintería (abre en otra pestaña)"><svg aria-hidden="true" viewBox="0 0 24 24"><path d="M14.1 21v-8.2h2.8l.4-3.2h-3.2V7.5c0-.9.3-1.5 1.6-1.5h1.7V3.1c-.3-.1-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.4v2.2H8v3.2h2.7V21h3.4Z"/></svg></a>
+    </div>
   </nav>
 </header>
 
 <main id="contenido">
-  <section id="inicio" class="hero">
-    <div class="container hero-grid">
-      <div class="hero-copy reveal">
-        <span class="trust-badge">Carpintería de autor · Fabricación a medida</span>
-        <h1>Tú lo imaginas, <em>nosotros lo hacemos</em></h1>
-        <p class="hero-description">
-          Diseño, fabricación e instalación de muebles a medida en Santiago, con espacios que combinan funcionalidad, calidad y carácter.
-        </p>
-
-        <div class="hero-actions">
-          <a class="button button-primary button-large"
-             href="https://wa.me/56988085830?text=Hola,%20quiero%20cotizar%20un%20proyecto%20a%20medida"
-             target="_blank" rel="noopener noreferrer">Cotizar proyecto sin costo</a>
-          <a class="button button-secondary button-large" href="#galeria">Ver proyectos</a>
+  <section id="inicio" class="hero" aria-labelledby="hero-title">
+    <div class="hero-stage">
+      <img class="hero-photo" src="assets/fotos-reales/cocina-terminada-1.jpg" fetchpriority="high" alt="Cocina a medida realizada por Taller La Carpintería">
+      <div class="container hero-stage-inner">
+        <div class="hero-copy reveal">
+          <span class="hero-kicker"><span class="kicker-line"></span> DISEÑO · FABRICACIÓN · INSTALACIÓN</span>
+          <h1 id="hero-title">Espacios que se sienten <em>hechos para ti.</em></h1>
+          <p class="hero-description">Cocinas, clósets y muebles a medida, pensados para tu espacio y fabricados por nuestro taller en Santiago.</p>
+          <div class="hero-actions"><a class="button button-primary button-large" href="#cotizador">Cotizar mi proyecto <span aria-hidden="true">↗</span></a><a class="button button-hero-outline button-large" href="#galeria">Ver trabajos realizados</a></div>
         </div>
-
-        <div class="hero-proof" aria-label="Nuestros pilares">
-          <article><span class="pillar-icon" aria-hidden="true">◆</span><strong>Calidad</strong></article>
-          <article><span class="pillar-icon" aria-hidden="true">✦</span><strong>Diseño</strong></article>
-          <article><span class="pillar-icon" aria-hidden="true">◇</span><strong>Experiencia</strong></article>
-          <article><span class="pillar-icon" aria-hidden="true">✓</span><strong>Confianza</strong></article>
-        </div>
-      </div>
-
-      <div class="hero-image reveal">
-        <img src="assets/fotos-reales/cocina-terminada-1.jpg" fetchpriority="high"
-             alt="Cocina a medida fabricada e instalada por Taller La Carpintería">
-        <aside class="project-highlight">
-          <strong>Proyecto entregado</strong>
-          <span>Cocina a medida · Santiago</span>
-          <small>Melamina, cubierta de cuarzo y herrajes de cierre suave</small>
-        </aside>
+        <div class="hero-bottom"><span>01 / UN TALLER, CADA DETALLE</span><span>Desliza para conocer nuestro trabajo ↓</span></div>
       </div>
     </div>
   </section>
 
-  <section id="servicios" class="section">
-    <div class="container">
-      <div class="services-showcase reveal">
-        <div class="services-copy">
-          <span class="eyebrow eyebrow-light">Diseñamos y fabricamos</span>
-          <h2>Soluciones pensadas para <em>tu forma de vivir.</em></h2>
-          <p>Diseño, fabricación e instalación en un solo equipo, con acompañamiento directo desde la primera idea.</p>
-          <a class="button button-gold" href="#cotizador">Calcular mi proyecto</a>
-        </div>
-        <ul class="services-list">
-          <li><span>01</span>Muebles de cocina</li>
-          <li><span>02</span>Closets y walk-in closets</li>
-          <li><span>03</span>Muebles a medida</li>
-          <li><span>04</span>Puertas y cubiertas</li>
-          <li><span>05</span>Proyectos personalizados</li>
-        </ul>
-      </div>
-    </div>
-  </section>
-
-  <section id="nosotros" class="section" aria-labelledby="nosotros-title">
-    <div class="container about-grid">
-      <div class="about-image reveal">
-        <img src="assets/fotos-reales/fundador.jpg" alt="Johan Barra Marchant, fundador de Taller La Carpintería" loading="lazy">
-      </div>
-      <div class="about-copy reveal">
-        <span class="eyebrow">Quién está detrás</span>
-        <h2 id="nosotros-title">Un taller de autor, con nombre y cara.</h2>
-        <p><strong>Johan Barra Marchant</strong> fundó Taller La Carpintería para diseñar y fabricar mobiliario a medida con acompañamiento directo en cada etapa: desde la primera idea hasta la instalación final.</p>
-        <p>Cada proyecto se diseña, mide y fabrica a la medida exacta del espacio, sin intermediarios entre el diseño y el taller.</p>
-        <a class="button button-secondary" href="https://wa.me/56988085830?text=Hola,%20quiero%20conocer%20m%C3%A1s%20sobre%20Taller%20La%20Carpinter%C3%ADa" target="_blank" rel="noopener noreferrer">Conversar con el taller</a>
-      </div>
-    </div>
-  </section>
-
-  <section id="galeria" class="section section-alt">
+  <section id="galeria" class="section gallery-section" aria-labelledby="gallery-title">
     <div class="container">
       <header class="section-header section-header-split">
-        <div><span class="eyebrow">Proyectos</span><h2>Diseños que hablan por sí solos.</h2></div>
-        <div class="gallery-filters" role="group" aria-label="Filtrar proyectos">
-          <button class="filter-button active" data-filter="todos" type="button">Todos</button>
-          <button class="filter-button" data-filter="cocinas" type="button">Cocinas</button>
-          <button class="filter-button" data-filter="closets" type="button">Closets</button>
-        </div>
+        <div><span class="eyebrow">Hecho por nuestro taller</span><h2 id="gallery-title">Ideas reales para imaginar la tuya.</h2><p>Explora proyectos terminados y usa uno como punto de partida para tu cotización.</p></div>
+        <div class="gallery-filters" role="group" aria-label="Filtrar proyectos"><button class="filter-button active" data-filter="todos" type="button">Todos</button><button class="filter-button" data-filter="cocinas" type="button">Cocinas</button><button class="filter-button" data-filter="closets" type="button">Clósets</button></div>
       </header>
-
       <div class="gallery-grid">
-        <article class="project-card reveal" data-category="cocinas">
-          <img src="assets/fotos-reales/cocina-terminada-1.jpg" alt="Cocina a medida con cubierta de cuarzo y muebles en melamina" loading="lazy">
-          <div class="project-content"><span>Cocina</span><h3>Cocina a medida</h3><p>Muebles superiores e inferiores · cubierta de cuarzo</p><button class="project-whatsapp" type="button" data-project="Cocina a medida (galería)">Cotizar este diseño</button></div>
-        </article>
-
-        <article class="project-card reveal" data-category="cocinas">
-          <img src="assets/fotos-reales/cocina-terminada-2.jpg" alt="Detalle de mesón y muebles inferiores de cocina a medida" loading="lazy">
-          <div class="project-content"><span>Cocina</span><h3>Cocina a medida</h3><p>Muebles inferiores en tono grafito · mesón de cuarzo</p><button class="project-whatsapp" type="button" data-project="Cocina a medida - detalle mesón (galería)">Cotizar este diseño</button></div>
-        </article>
-
-        <article class="project-card reveal" data-category="closets">
-          <img src="assets/fotos-reales/closet-terminado-1.jpg" alt="Closet a medida con puertas corredizas, repisas y cajones" loading="lazy">
-          <div class="project-content"><span>Closet</span><h3>Closet a medida</h3><p>Puertas corredizas · repisas y cajoneras interiores</p><button class="project-whatsapp" type="button" data-project="Closet a medida (galería)">Cotizar este diseño</button></div>
-        </article>
-
+        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-1.jpg" alt="Cocina real a medida con muebles superiores e inferiores" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Cocina a medida</h3><p>Una distribución que aprovecha cada rincón.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
+        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-2.jpg" alt="Detalle real de mesón y muebles inferiores de cocina" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Detalle de cocina</h3><p>Materiales y terminaciones elegidos para el uso diario.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida - detalle mesón (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
+        <article class="project-card reveal" data-category="closets"><img src="assets/fotos-reales/closet-terminado-1.jpg" alt="Clóset real a medida con puertas, repisas y cajones" loading="lazy"><div class="project-content"><span>Clóset · Proyecto real</span><h3>Clóset a medida</h3><p>Espacio para guardar mejor, diseñado a tu medida.</p><button class="project-whatsapp" type="button" data-type="closet" data-project="Clóset a medida (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
       </div>
-      <p class="gallery-note">Próximamente sumaremos ejemplos de living y mobiliario de oficina a esta galería.</p>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="container">
-      <header class="section-header">
-        <span class="eyebrow">Antes / Después</span>
-        <h2>La diferencia se entiende mejor cuando puedes compararla.</h2>
-      </header>
-
-      <div class="before-after reveal" data-compare style="--position:50%;">
-        <img src="assets/fotos-reales/despues-1.jpeg" alt="Cocina después de la remodelación, mismo ángulo del pasillo">
-        <div class="before-layer"><img src="assets/fotos-reales/antes-1.jpeg" alt="Cocina antes de la remodelación, mismo ángulo del pasillo"></div>
-        <span class="compare-label compare-before">ANTES</span>
-        <span class="compare-label compare-after">DESPUÉS</span>
-        <div class="compare-divider"><span>↔</span></div>
-        <input type="range" min="0" max="100" value="50" aria-label="Comparar antes y después">
+      <div class="gallery-comparison">
+        <div><span class="eyebrow">Antes y después</span><h3>Una transformación real, vista de cerca.</h3><p>Arrastra el control para comparar el mismo espacio.</p></div>
+        <div class="before-after reveal" data-compare style="--position:50%;"><img src="assets/fotos-reales/despues-1.jpeg" alt="Cocina después de la remodelación, mismo ángulo" loading="lazy"><div class="before-layer"><img src="assets/fotos-reales/antes-1.jpeg" alt="Cocina antes de la remodelación, mismo ángulo" loading="lazy"></div><span class="compare-label compare-before">ANTES</span><span class="compare-label compare-after">DESPUÉS</span><div class="compare-divider"><span>↔</span></div><input type="range" min="0" max="100" value="50" aria-label="Comparar antes y después"></div>
       </div>
-    </div>
-  </section>
-
-  <section id="proceso" class="section section-alt" aria-labelledby="proceso-title">
-    <div class="container">
-      <header class="section-header">
-        <span class="eyebrow">Cómo trabajamos</span>
-        <h2 id="proceso-title">De la idea al mueble instalado, en 5 pasos.</h2>
-      </header>
-      <ol class="process-steps">
-        <li><span class="process-number">1</span><strong>Consulta y estimación</strong><p>Nos cuentas tu proyecto y usas el cotizador para tener un primer rango referencial.</p></li>
-        <li><span class="process-number">2</span><strong>Visita técnica y medición</strong><p>Vamos al espacio, tomamos medidas exactas y revisamos condiciones de instalación.</p></li>
-        <li><span class="process-number">3</span><strong>Diseño y aprobación</strong><p>Presentamos el diseño con materiales y valor final para tu aprobación, sin sorpresas.</p></li>
-        <li><span class="process-number">4</span><strong>Fabricación</strong><p>Fabricamos el mueble a medida en nuestro taller con los materiales acordados.</p></li>
-        <li><span class="process-number">5</span><strong>Instalación y garantía</strong><p>Coordinamos retiro e instalación, y quedamos disponibles ante cualquier ajuste.</p></li>
-      </ol>
     </div>
   </section>
 
   <section id="cotizador" class="section configurator-section" aria-labelledby="cotizador-title">
     <div class="container">
       <header class="section-header">
-        <span class="eyebrow">Cotiza y visualiza tu proyecto</span>
-        <h2 id="cotizador-title">Configura una idea básica de tu cocina o closet, visualízala en 3D y obtén una estimación.</h2>
-        <p>Elige qué quieres cotizar, ajusta las medidas y módulos, y mira el modelo actualizarse al instante. Es un punto de partida: la cotización real se confirma en una visita técnica.</p>
+        <span class="eyebrow">Tu proyecto comienza aquí</span>
+        <h2 id="cotizador-title">Dale forma a tu idea. Visualízala en 3D.</h2>
+        <p>Elige cocina o clóset, ajusta medidas y terminaciones, y obtén un rango referencial. El valor definitivo se confirma con medidas y materiales reales.</p>
       </header>
 
       <div class="configurator-layout">
@@ -335,72 +220,32 @@
     </div>
   </section>
 
-  <section class="guarantee-band" aria-label="Garantías del servicio">
-    <div class="container guarantee-grid">
-      <article><span aria-hidden="true">↗</span><strong>Retiro e instalación</strong><small>Coordinación de principio a fin</small></article>
-      <article><span aria-hidden="true">✓</span><strong>Garantía por escrito</strong><small>Sobre fabricación e instalación</small></article>
-      <article><span aria-hidden="true">◇</span><strong>Atención personalizada</strong><small>Contacto directo durante el proyecto</small></article>
-    </div>
-  </section>
 
-  <section class="testimonials-compact" aria-labelledby="testimonials-title">
-    <div class="container testimonials-compact-grid">
-      <header>
-        <span class="eyebrow">Clientes que nos valoran</span>
-        <h2 id="testimonials-title">Experiencias reales, resultados que perduran.</h2>
-      </header>
-      <div class="testimonials-compact-list">
-        <article><div class="stars" aria-label="5 de 5 estrellas">★★★★★</div><blockquote>“Quedamos muy conformes con la distribución y las terminaciones.”</blockquote><footer><strong>Carolina M.</strong><span>Cocina a medida</span></footer></article>
-        <article><div class="stars" aria-label="5 de 5 estrellas">★★★★★</div><blockquote>“El proceso fue muy claro y el resultado terminó como lo imaginábamos.”</blockquote><footer><strong>Rodrigo P.</strong><span>Closet</span></footer></article>
-        <article><div class="stars" aria-label="5 de 5 estrellas">★★★★★</div><blockquote>“Nos ayudaron a transformar una idea en un mueble mucho más funcional.”</blockquote><footer><strong>Andrea V.</strong><span>Living</span></footer></article>
-      </div>
-    </div>
-  </section>
-
-  <section id="preguntas-frecuentes" class="section faq-section" aria-labelledby="faq-title">
+  <section id="proceso" class="section process-section" aria-labelledby="proceso-title">
     <div class="container">
-      <header class="section-header">
-        <span class="eyebrow">Preguntas frecuentes</span>
-        <h2 id="faq-title">Antes de escribirnos, quizás esto ya responde tu duda.</h2>
-      </header>
-      <div class="faq-list">
-        <details class="faq-item">
-          <summary>¿Cuánto se demora la fabricación de un mueble a medida?</summary>
-          <p>Depende del tipo de proyecto y su complejidad. En la visita técnica te damos un plazo concreto de fabricación e instalación antes de confirmar el trabajo.</p>
-        </details>
-        <details class="faq-item">
-          <summary>¿El valor del cotizador online es el precio final?</summary>
-          <p>No, es un rango referencial. El valor definitivo se confirma después de la visita técnica y el diseño, cuando ya tenemos medidas exactas y materiales elegidos.</p>
-        </details>
-        <details class="faq-item">
-          <summary>¿En qué zonas trabajan?</summary>
-          <p>Atendemos Santiago y alrededores. Escríbenos tu comuna por WhatsApp y te confirmamos cobertura y coordinación de visita.</p>
-        </details>
-        <details class="faq-item">
-          <summary>¿Qué pasa si las medidas del espacio cambian durante la obra?</summary>
-          <p>Por eso siempre tomamos medidas finales en la visita técnica antes de fabricar. Si hay cambios posteriores, coordinamos contigo un ajuste antes de continuar.</p>
-        </details>
-        <details class="faq-item">
-          <summary>¿Cómo se coordina el pago?</summary>
-          <p>Se conversa directamente contigo según el proyecto. Escríbenos por WhatsApp y te explicamos las condiciones vigentes.</p>
-        </details>
-        <details class="faq-item">
-          <summary>¿Incluye instalación y garantía?</summary>
-          <p>Sí, coordinamos retiro e instalación de principio a fin, y quedamos disponibles ante cualquier ajuste posterior a la entrega.</p>
-        </details>
-      </div>
+      <header class="section-header"><span class="eyebrow">De la idea a tu espacio</span><h2 id="proceso-title">Cada detalle tiene su momento.</h2></header>
+      <ol class="process-steps">
+        <li class="process-step" data-photo-slot="imaginamos">
+          <div class="process-media"><img src="assets/fotos-reales/proceso-imaginamos.webp" alt="Imagen ilustrativa de la planificación de un mueble a medida" loading="lazy" width="660" height="760"></div>
+          <div class="process-copy"><span class="process-number">01</span><strong>Imaginamos</strong><p>Tu idea y tus medidas.</p></div>
+        </li>
+        <li class="process-step" data-photo-slot="fabricamos">
+          <div class="process-media"><img src="assets/fotos-reales/proceso-fabricamos.webp" alt="Imagen ilustrativa de gabinetes en proceso de fabricación" loading="lazy" width="660" height="760"></div>
+          <div class="process-copy"><span class="process-number">02</span><strong>Fabricamos</strong><p>Trabajo a medida.</p></div>
+        </li>
+        <li class="process-step" data-photo-slot="instalamos">
+          <div class="process-media"><img src="assets/fotos-reales/proceso-instalamos.webp" alt="Imagen ilustrativa de una cocina instalada" loading="lazy" width="660" height="760"></div>
+          <div class="process-copy"><span class="process-number">03</span><strong>Instalamos</strong><p>Tu espacio terminado.</p></div>
+        </li>
+      </ol>
+      <p class="process-photo-note">Imágenes referenciales del proceso.</p>
     </div>
   </section>
 
-  <section class="contact-banner" aria-labelledby="contact-banner-title">
-    <div class="container contact-banner-grid">
-      <div>
-        <span>Agenda tu evaluación sin compromiso</span>
-        <h2 id="contact-banner-title">Hablemos de tu proyecto: <a href="tel:+56988085830">+56 9 8808 5830</a></h2>
-      </div>
-      <a class="button button-gold button-large"
-         href="https://wa.me/56988085830?text=Hola,%20quiero%20agendar%20una%20evaluaci%C3%B3n%20sin%20compromiso"
-         target="_blank" rel="noopener noreferrer">Agendar evaluación</a>
+  <section id="nosotros" class="section about-v3" aria-labelledby="nosotros-title">
+    <div class="container about-v3-grid">
+      <div class="about-v3-photo reveal"><img src="assets/fotos-reales/fundador-optimizado.webp" alt="Johan Barra Marchant, fundador de Taller La Carpintería" loading="lazy" width="780" height="900"><span>Johan Barra Marchant · Fundador</span></div>
+      <div class="about-v3-copy reveal"><span class="eyebrow">El taller detrás de tu proyecto</span><h2 id="nosotros-title">Un taller de autor, <em>con nombre y cara.</em></h2><p>Soy Johan Barra Marchant. En Taller La Carpintería diseñamos y fabricamos mobiliario a medida, acompañándote desde la primera idea hasta la instalación final.</p><p>Cada proyecto nace de escuchar cómo quieres vivir tu espacio y resolverlo con oficio, medidas reales y atención directa.</p><a class="button button-primary" href="https://wa.me/56988085830?text=Hola,%20quiero%20conversar%20sobre%20un%20proyecto%20a%20medida" target="_blank" rel="noopener noreferrer">Conversa con el taller <span aria-hidden="true">↗</span></a></div>
     </div>
   </section>
 </main>
@@ -413,14 +258,21 @@
     </section>
     <section><h2>Contacto</h2><a href="https://wa.me/56988085830" target="_blank" rel="noopener noreferrer">+56 9 8808 5830</a><a href="mailto:contacto@lacarpinteriachile.cl">contacto@lacarpinteriachile.cl</a><span>Santiago, Chile</span></section>
     <section><h2>Horario</h2><span>Lunes a viernes</span><span>09:00 – 18:00</span><span>Sábado con coordinación</span></section>
-    <section><h2>Legal</h2><span>Política de privacidad — pendiente</span><span>Términos de servicio — pendiente</span></section>
+    <section><h2>Explora</h2><a href="#galeria">Trabajos reales</a><a href="#cotizador">Cotizador 3D</a><a href="#nosotros">El taller</a></section>
     <p class="copyright">© 2026 Taller La Carpintería. Todos los derechos reservados.</p>
   </div>
 </footer>
 
-<a class="floating-whatsapp"
-   href="https://wa.me/56988085830?text=Hola,%20quiero%20cotizar%20un%20proyecto"
-   target="_blank" rel="noopener noreferrer" aria-label="Contactar por WhatsApp">● <span>WhatsApp</span></a>
 
+<div class="assistant-widget" data-assistant>
+  <div id="assistant-panel" class="assistant-panel assistant-chat" role="dialog" aria-label="Orientación de La Carpintería" hidden>
+    <div class="assistant-panel-head"><div class="assistant-head-avatar"><img src="assets/brand/asistente-maestro-panel.webp" alt="" width="66" height="70"></div><div class="assistant-head-copy"><strong>Asistente del Taller</strong><span class="assistant-status">Te ayudo con tu proyecto</span></div><div class="assistant-head-actions"><button class="assistant-minimize" type="button" aria-label="Minimizar asistente" data-assistant-minimize>−</button><button class="assistant-close" type="button" aria-label="Cerrar asistente" data-assistant-close>×</button></div></div>
+    <div class="assistant-messages" data-assistant-messages role="log" aria-live="polite" aria-relevant="additions text"></div>
+    <div class="assistant-replies" data-assistant-replies aria-label="Respuestas rápidas"></div>
+    <form class="assistant-form" data-assistant-form><label for="assistant-question">Tu consulta</label><div><input id="assistant-question" name="question" type="text" maxlength="180" autocomplete="off" placeholder="Escribe tu pregunta..."><button type="submit" aria-label="Enviar pregunta"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m-6-6 6 6-6 6"/></svg></button></div></form>
+    <div class="assistant-foot"><button type="button" data-action="contact"><svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M5 6.5h14v9H9l-4 3v-12Z"/></svg>Hablar directamente con el taller</button></div>
+  </div>
+  <button class="assistant-trigger" type="button" aria-controls="assistant-panel" aria-expanded="false" aria-label="Abrir asistente de La Carpintería" data-assistant-trigger><span class="assistant-avatar"><img src="assets/brand/asistente-maestro-boton.webp" alt="" width="59" height="59"></span><span class="assistant-trigger-copy"><strong>¿Te ayudo?</strong><small>Tu proyecto empieza aquí</small></span><span class="assistant-trigger-arrow" aria-hidden="true">↗</span></button>
+</div>
 </body>
 </html>
