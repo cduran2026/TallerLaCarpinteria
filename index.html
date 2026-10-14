@@ -77,9 +77,9 @@
         <div class="gallery-filters" role="group" aria-label="Filtrar proyectos"><button class="filter-button active" data-filter="todos" type="button">Todos</button><button class="filter-button" data-filter="cocinas" type="button">Cocinas</button><button class="filter-button" data-filter="closets" type="button">Clósets</button></div>
       </header>
       <div class="gallery-grid">
-        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-1.jpg" alt="Cocina real a medida con muebles superiores e inferiores" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Cocina a medida</h3><p>Una distribución que aprovecha cada rincón.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
-        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-2.jpg" alt="Detalle real de mesón y muebles inferiores de cocina" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Detalle de cocina</h3><p>Materiales y terminaciones elegidos para el uso diario.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida - detalle mesón (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
-        <article class="project-card reveal" data-category="closets"><img src="assets/fotos-reales/closet-terminado-1.jpg" alt="Clóset real a medida con puertas, repisas y cajones" loading="lazy"><div class="project-content"><span>Clóset · Proyecto real</span><h3>Clóset a medida</h3><p>Espacio para guardar mejor, diseñado a tu medida.</p><button class="project-whatsapp" type="button" data-type="closet" data-project="Clóset a medida (galería)">Cotizar este diseño <span aria-hidden="true">↗</span></button></div></article>
+        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-1.jpg" alt="Cocina real a medida con muebles superiores e inferiores" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Cocina a medida</h3><p>Una distribución que aprovecha cada rincón.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida (galería)">Cotizar un proyecto similar <span aria-hidden="true">↗</span></button></div></article>
+        <article class="project-card reveal" data-category="cocinas"><img src="assets/fotos-reales/cocina-terminada-2.jpg" alt="Detalle real de mesón y muebles inferiores de cocina" loading="lazy"><div class="project-content"><span>Cocina · Proyecto real</span><h3>Detalle de cocina</h3><p>Materiales y terminaciones elegidos para el uso diario.</p><button class="project-whatsapp" type="button" data-type="kitchen" data-project="Cocina a medida - detalle mesón (galería)">Cotizar un proyecto similar <span aria-hidden="true">↗</span></button></div></article>
+        <article class="project-card reveal" data-category="closets"><img src="assets/fotos-reales/closet-terminado-1.jpg" alt="Clóset real a medida con puertas, repisas y cajones" loading="lazy"><div class="project-content"><span>Clóset · Proyecto real</span><h3>Clóset a medida</h3><p>Espacio para guardar mejor, diseñado a tu medida.</p><button class="project-whatsapp" type="button" data-type="closet" data-project="Clóset a medida (galería)">Cotizar un proyecto similar <span aria-hidden="true">↗</span></button></div></article>
       </div>
       <div class="gallery-comparison">
         <div><span class="eyebrow">Antes y después</span><h3>Una transformación real, vista de cerca.</h3><p>Arrastra el control para comparar el mismo espacio.</p></div>
@@ -98,11 +98,15 @@
 
       <div class="configurator-layout">
         <div class="configurator-controls">
+          <div class="mobile-quote-shortcut" aria-label="Resumen del proyecto">
+            <div class="mobile-quote-shortcut-copy"><span>Tu proyecto</span><strong id="mobile-quote-summary">Cocina</strong></div>
+            <button id="mobile-quote-jump" type="button">Ver estimación <span aria-hidden="true">↓</span></button>
+          </div>
           <div class="fc-group">
             <span class="fc-label">1. ¿Qué quieres cotizar?</span>
             <div class="fc-segmented fc-type" role="radiogroup" aria-label="Tipo de proyecto">
               <label><input type="radio" name="fcType" value="kitchen" checked><span>Cocina</span></label>
-              <label><input type="radio" name="fcType" value="closet"><span>Closet</span></label>
+              <label><input type="radio" name="fcType" value="closet"><span>Clóset</span></label>
             </div>
           </div>
 
@@ -212,7 +216,7 @@
             <span class="estimate-label">Estimación referencial</span>
             <div class="price-range" id="price-range"><span class="price-placeholder">Calculando…</span></div>
             <p class="calculator-disclaimer">Valor sujeto a validación de medidas, materiales, diseño y condiciones reales en terreno.</p>
-            <button id="send-budget-whatsapp" class="calculator-whatsapp-button" type="button"><span aria-hidden="true">●</span>Solicitar visita y cotización por WhatsApp</button>
+            <button id="send-budget-whatsapp" class="calculator-whatsapp-button" type="button"><span aria-hidden="true">●</span>Enviar mi proyecto por WhatsApp</button>
             <a class="direct-whatsapp-link" href="https://wa.me/56988085830?text=Hola,%20prefiero%20conversar%20directamente%20sobre%20mi%20proyecto" target="_blank" rel="noopener noreferrer">Prefiero hablar directamente por WhatsApp</a>
           </aside>
         </div>
@@ -223,7 +227,7 @@
 
   <section id="proceso" class="section process-section" aria-labelledby="proceso-title">
     <div class="container">
-      <header class="section-header"><span class="eyebrow">De la idea a tu espacio</span><h2 id="proceso-title">Cada detalle tiene su momento.</h2></header>
+      <header class="section-header"><span class="eyebrow">De la idea a tu espacio</span><h2 id="proceso-title">De tu idea a la instalación.</h2></header>
       <ol class="process-steps">
         <li class="process-step" data-photo-slot="imaginamos">
           <div class="process-media"><img src="assets/fotos-reales/proceso-imaginamos.webp" alt="Imagen ilustrativa de la planificación de un mueble a medida" loading="lazy" width="660" height="760"></div>

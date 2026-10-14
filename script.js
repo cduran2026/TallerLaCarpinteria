@@ -111,13 +111,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const nameField = q("#customer-name");
     const locationField = q("#customer-location");
     const summaryEl = q("#result-summary");
+    const mobileSummaryEl = q("#mobile-quote-summary");
     let budget = null;
     let started = false;
     let completed = "";
 
     const setSummary = (tags) => {
       if (summaryEl) summaryEl.innerHTML = tags.map((t) => `<span>${t}</span>`).join("");
+      if (mobileSummaryEl) mobileSummaryEl.textContent = tags.slice(0, 2).join(" · ");
     };
+
+    q("#mobile-quote-jump")?.addEventListener("click", () => {
+      q(".calculator-result-card")?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "start",
+      });
+    });
 
     const calculate = () => {
       const type = checkedValue("fcType", "kitchen");
@@ -164,7 +173,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const parts = [rod && "barras", shelves && "repisas", drawers && "cajoneras"].filter(Boolean);
         extras = parts.length ? `Interior: ${parts.join(", ")}` : "Interior sin repisas ni cajoneras";
         tags = [
-          "Closet recto",
+          "Clóset recto",
           `${decimals.format(width)} m × ${decimals.format(height)} m`,
           `Profundidad ${decimals.format(depth)} m`,
           extras,
@@ -219,7 +228,7 @@ document.addEventListener("DOMContentLoaded", () => {
       ].filter(Boolean);
       if (nameField?.value.trim()) lines.push(`Nombre: ${nameField.value.trim()}`);
       if (locationField?.value.trim()) lines.push(`Comuna: ${locationField.value.trim()}`);
-      lines.push("", "Quisiera revisar esta estimación y coordinar una evaluación sin compromiso.");
+      lines.push("", "Quisiera revisar esta estimación y saber cómo seguimos.");
       track("whatsapp_cotizador", { project: budget.type, min: Math.round(budget.min), max: Math.round(budget.max) });
       window.open(waURL(lines.join("\n")), "_blank", "noopener,noreferrer");
     });

@@ -10,6 +10,18 @@ const mime = {
   '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
   '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp',
 };
+const luminance = color => {
+  const channels = color.match(/[\d.]+/g).slice(0, 3).map(Number).map(channel => {
+    const normalized = channel / 255;
+    return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+  });
+  return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+};
+const contrast = (foreground, background) => {
+  const a = luminance(foreground);
+  const b = luminance(background);
+  return (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+};
 
 (async () => {
   const server = http.createServer((request, response) => {
@@ -45,6 +57,24 @@ const mime = {
     assert.equal(await page.locator('.process-media img').count(), 3);
     assert.equal(await page.locator('.header-social a').count(), 2);
     assert.equal(await page.locator('.mobile-social a').count(), 2);
+    assert.equal(await page.getByRole('button', { name: 'Cotizar un proyecto similar' }).count(), 3);
+    assert.equal(await page.getByRole('heading', { name: 'De tu idea a la instalación.' }).count(), 1);
+    const labelColors = await page.evaluate(() => [
+      ['#galeria .eyebrow', '.gallery-section'],
+      ['#cotizador .eyebrow', '.configurator-section'],
+      ['.project-content > span', '.project-card'],
+      ['.fc-row output', '.configurator-controls'],
+    ].map(([text, surface]) => [getComputedStyle(document.querySelector(text)).color, getComputedStyle(document.querySelector(surface)).backgroundColor]));
+    for (const [foreground, background] of labelColors) {
+      assert.ok(contrast(foreground, background) >= 4.5, `Contraste insuficiente: ${foreground} sobre ${background}`);
+    }
+    const comparator = page.getByRole('slider', { name: 'Comparar antes y después' });
+    await page.locator('.project-whatsapp').last().focus();
+    await page.keyboard.press('Tab');
+    assert.equal(await comparator.evaluate(element => document.activeElement === element), true);
+    await comparator.press('ArrowRight');
+    assert.equal(await comparator.inputValue(), '51');
+    assert.equal(await page.locator('.compare-divider span').evaluate(element => getComputedStyle(element).outlineStyle), 'solid');
     await page.locator('.filter-button[data-filter="closets"]').click();
     assert.equal(await page.locator('.project-card:not(.hidden)').count(), 1);
     await page.locator('.filter-button[data-filter="todos"]').click();
@@ -67,9 +97,11 @@ const mime = {
     assert.equal(state.kitchen.type, 'kitchen');
     assert.equal(state.kitchen.width, 280);
     assert.match(await page.locator('#price-range').innerText(), /\$/);
+    assert.match(await page.locator('#send-budget-whatsapp').innerText(), /Enviar mi proyecto por WhatsApp/);
     await page.locator('#send-budget-whatsapp').click();
     assert.ok(await page.evaluate(() => window.__openedLinks.some(link =>
-      link.startsWith('https://wa.me/') && decodeURIComponent(link).includes('Proyecto: Cocina a medida')
+      link.startsWith('https://wa.me/') && decodeURIComponent(link).includes('Proyecto: Cocina a medida') &&
+      decodeURIComponent(link).includes('Quisiera revisar esta estimación y saber cómo seguimos.')
     )), 'El cotizador genera el mensaje sin enviarlo');
 
     await page.locator('[data-assistant-trigger]').click();
@@ -87,7 +119,24 @@ const mime = {
     for (const width of [1440, 1024, 768, 430, 390, 360]) {
       await page.setViewportSize({ width, height: 900 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Scroll horizontal a ' + width + 'px');
+      if (width <= 430) {
+        assert.equal(await page.locator('.mobile-quote-shortcut').isVisible(), true);
+        assert.match(await page.locator('#mobile-quote-summary').innerText(), /Cocina/);
+        assert.ok(await page.locator('#mobile-quote-jump').evaluate(element => element.getBoundingClientRect().height >= 44));
+        await page.locator('[data-assistant-trigger]').click();
+        assert.ok(await page.locator('.assistant-form button').evaluate(element => element.getBoundingClientRect().height >= 44));
+        assert.ok(await page.locator('.assistant-reply-chip').first().evaluate(element => element.getBoundingClientRect().height >= 44));
+        await page.locator('[data-assistant-minimize]').click();
+      }
     }
+    await page.locator('input[name="fcType"][value="closet"]').check();
+    assert.match(await page.locator('#mobile-quote-summary').innerText(), /Clóset/);
+    assert.match(await page.locator('#price-range').innerText(), /\$/);
+    await page.locator('#mobile-quote-jump').click();
+    await page.waitForFunction(() => {
+      const top = document.querySelector('.calculator-result-card').getBoundingClientRect().top;
+      return top >= 60 && top <= 200;
+    });
     await page.locator('.menu-toggle').click();
     assert.equal(await page.locator('#mobile-nav').isVisible(), true);
     assert.equal(await page.locator('#mobile-nav a[href*="instagram.com"]').count(), 1);
