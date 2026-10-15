@@ -54,6 +54,35 @@ const contrast = (foreground, background) => {
     await page.goto(origin + '/', { waitUntil: 'domcontentloaded' });
     assert.equal(await page.locator('a[href^="maestro/"]').count(), 0);
     assert.equal(await page.locator('.project-card').count(), 3);
+    assert.equal(await page.locator('.hero-project-card').count(), 5, 'Tres proyectos reales y dos tarjetas para el bucle');
+    assert.equal(await page.locator('.hero-showcase-count').innerText(), '01 / 03');
+    assert.equal(await page.locator('.hero-showcase-progress span').count(), 3);
+    assert.equal(await page.locator('.hero-showcase-progress span.active').count(), 1);
+    assert.equal(await page.locator('.hero-project-card[aria-hidden="false"] h2').innerText(), 'Cocina a medida');
+    assert.equal(await page.evaluate(() => {
+      const viewport = document.querySelector('.hero-showcase-viewport').getBoundingClientRect();
+      const next = document.querySelectorAll('.hero-project-card')[2].getBoundingClientRect();
+      return next.left < viewport.right && next.right > viewport.right;
+    }), true, 'El proyecto siguiente asoma en escritorio');
+    await page.locator('.hero-showcase').hover();
+    const nextProject = page.getByRole('button', { name: 'Proyecto siguiente' });
+    for (const [count, title] of [['02 / 03', 'Clóset a medida'], ['03 / 03', 'Detalles de cocina'], ['01 / 03', 'Cocina a medida']]) {
+      await nextProject.click();
+      await page.waitForTimeout(550);
+      assert.equal(await page.locator('.hero-showcase-count').innerText(), count);
+      assert.equal(await page.locator('.hero-project-card[aria-hidden="false"] h2').innerText(), title);
+    }
+    await page.getByRole('button', { name: 'Proyecto anterior' }).click();
+    await page.waitForTimeout(550);
+    assert.equal(await page.locator('.hero-showcase-count').innerText(), '03 / 03');
+    await page.locator('.hero-project-card[aria-hidden="false"] a').click();
+    assert.equal(new URL(page.url()).hash, '#proyecto-detalles-de-cocina');
+    await page.locator('.hero-project-card[aria-hidden="false"] button').click();
+    assert.equal(await page.locator('input[name="fcType"][value="kitchen"]').isChecked(), true);
+    await page.locator('#send-budget-whatsapp').click();
+    assert.ok(await page.evaluate(() => window.__openedLinks.some(link =>
+      decodeURIComponent(link).includes('Referencia de la galería: Cocina a medida - detalle mesón (galería)')
+    )), 'La cotización del hero conserva la referencia real del proyecto');
     assert.equal(await page.locator('.process-media img').count(), 3);
     assert.equal(await page.locator('.header-social a').count(), 2);
     assert.equal(await page.locator('.mobile-social a').count(), 2);
@@ -67,6 +96,7 @@ const contrast = (foreground, background) => {
       assert.equal(await link.getAttribute('rel'), 'noopener noreferrer');
       assert.match(await link.getAttribute('aria-label'), /Taller La Carpintería/);
     }
+    await page.keyboard.press('Tab');
     await page.locator('.header-social a').first().focus();
     assert.equal(await page.locator('.header-social a').first().evaluate(element => getComputedStyle(element).outlineStyle), 'solid');
     const labelColors = await page.evaluate(() => [
@@ -126,11 +156,20 @@ const contrast = (foreground, background) => {
     await page.locator('[data-assistant-minimize]').click();
     assert.equal(await page.locator('#assistant-panel').isVisible(), false);
 
-    for (const width of [1440, 1024, 768, 430, 390, 360]) {
+    for (const width of [1440, 1280, 1024, 768, 430, 390, 360]) {
       await page.setViewportSize({ width, height: 900 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Scroll horizontal a ' + width + 'px');
-      assert.equal(await page.locator('.header-social a:visible').count(), width >= 430 ? 2 : 0);
-      if (width >= 430) assert.ok(await page.locator('.header-social a').first().evaluate(element => element.getBoundingClientRect().width >= 44 && element.getBoundingClientRect().height >= 44));
+      assert.equal(await page.locator('.header-social a:visible').count(), width >= 1200 ? 2 : 0);
+      if (width >= 1200) {
+        assert.deepEqual(await page.locator('.header-social a').allInnerTexts(), ['Instagram', 'Facebook']);
+        assert.ok(await page.locator('.header-social a').first().evaluate(element => element.getBoundingClientRect().width > 100 && element.getBoundingClientRect().height >= 44));
+      } else {
+        await page.locator('.menu-toggle').click();
+        assert.equal(await page.locator('.mobile-social a:visible').count(), 2);
+        assert.deepEqual(await page.locator('.mobile-social a').allInnerTexts(), ['Instagram', 'Facebook']);
+        assert.ok(await page.locator('.mobile-social a').first().evaluate(element => element.getBoundingClientRect().height >= 44));
+        await page.locator('.menu-toggle').click();
+      }
       if (width <= 430) {
         assert.equal(await page.locator('.mobile-quote-shortcut').isVisible(), true);
         assert.match(await page.locator('#mobile-quote-summary').innerText(), /Cocina/);

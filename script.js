@@ -74,6 +74,139 @@ document.addEventListener("DOMContentLoaded", () => {
     selectedGalleryProject = button.dataset.project || "";
   }));
 
+  // El hero toma imágenes, títulos, categorías y acciones de las tarjetas reales de la galería.
+  const showcase = document.querySelector(".hero-showcase");
+  if (showcase) {
+    const track = showcase.querySelector(".hero-showcase-track");
+    const viewport = showcase.querySelector(".hero-showcase-viewport");
+    const counter = showcase.querySelector(".hero-showcase-count");
+    const progress = showcase.querySelector(".hero-showcase-progress");
+    const projects = cards.filter((card) => card.dataset.heroOrder)
+      .sort((a, b) => Number(a.dataset.heroOrder) - Number(b.dataset.heroOrder));
+    if (projects.length && track && viewport && counter && progress) {
+      const marks = projects.map(() => {
+        const mark = document.createElement("span");
+        progress.append(mark);
+        return mark;
+      });
+      const makeSlide = (source, priority = false) => {
+        const card = document.createElement("article");
+        card.className = "hero-project-card";
+        card.dataset.projectId = source.id;
+        const sourceImage = source.querySelector("img");
+        const image = document.createElement("img");
+        image.className = "hero-project-image";
+        image.src = sourceImage.getAttribute("src");
+        image.alt = sourceImage.alt;
+        image.loading = priority ? "eager" : "lazy";
+        if (priority) image.fetchPriority = "high";
+        const content = document.createElement("div");
+        content.className = "hero-project-content";
+        const category = document.createElement("span");
+        category.className = "hero-project-category";
+        category.textContent = source.querySelector(".project-content > span").textContent.split("·")[0].trim();
+        const title = document.createElement("h2");
+        title.textContent = source.dataset.heroTitle || source.querySelector(".project-content h3").textContent;
+        const description = document.createElement("p");
+        description.textContent = source.dataset.heroDescription || source.querySelector(".project-content p").textContent;
+        const actions = document.createElement("div");
+        actions.className = "hero-project-actions";
+        const view = document.createElement("a");
+        view.href = `#${source.id}`;
+        view.textContent = "Ver proyecto";
+        view.addEventListener("click", () => {
+          document.querySelector('.filter-button[data-filter="todos"]')?.click();
+        });
+        const quote = document.createElement("button");
+        quote.type = "button";
+        quote.textContent = "Cotizar algo similar";
+        quote.addEventListener("click", () => source.querySelector(".project-whatsapp")?.click());
+        actions.append(view, quote);
+        content.append(category, title, description, actions);
+        card.append(image, content);
+        return card;
+      };
+      track.append(makeSlide(projects.at(-1)), ...projects.map((project, index) => makeSlide(project, index === 0)), makeSlide(projects[0]));
+      const slides = [...track.children];
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+      let slideIndex = 1;
+      let moving = false;
+      let visible = false;
+      let hovered = false;
+      let focused = false;
+      let pausedUntil = 0;
+      const step = () => slides[0].getBoundingClientRect().width + parseFloat(getComputedStyle(track).gap || 0);
+      const position = () => { track.style.transform = `translate3d(${-slideIndex * step()}px, 0, 0)`; };
+      const update = (announce) => {
+        const current = ((slideIndex - 1 + projects.length) % projects.length);
+        counter.setAttribute("aria-live", announce ? "polite" : "off");
+        counter.textContent = `${String(current + 1).padStart(2, "0")} / ${String(projects.length).padStart(2, "0")}`;
+        marks.forEach((mark, index) => mark.classList.toggle("active", index === current));
+        slides.forEach((slide, index) => {
+          slide.inert = index !== slideIndex;
+          slide.setAttribute("aria-hidden", String(index !== slideIndex));
+        });
+      };
+      const settle = () => {
+        if (slideIndex === 0 || slideIndex === projects.length + 1) {
+          slideIndex = slideIndex === 0 ? projects.length : 1;
+          track.style.transition = "none";
+          position();
+          requestAnimationFrame(() => { track.style.transition = ""; });
+          update(false);
+        }
+        moving = false;
+      };
+      const advance = (direction, manual = true) => {
+        if (moving) return;
+        if (manual) pausedUntil = Date.now() + 12000;
+        slideIndex += direction;
+        update(manual);
+        if (reducedMotion.matches) { position(); settle(); return; }
+        moving = true;
+        position();
+      };
+      track.addEventListener("transitionend", (event) => { if (event.target === track && event.propertyName === "transform") settle(); });
+      showcase.querySelector(".hero-showcase-prev").addEventListener("click", () => advance(-1));
+      showcase.querySelector(".hero-showcase-next").addEventListener("click", () => advance(1));
+      showcase.addEventListener("mouseenter", () => { hovered = true; });
+      showcase.addEventListener("mouseleave", () => { hovered = false; });
+      showcase.addEventListener("focusin", () => { focused = true; });
+      showcase.addEventListener("focusout", () => { focused = showcase.contains(document.activeElement); });
+      let touchStart = null;
+      viewport.addEventListener("touchstart", (event) => {
+        const touch = event.changedTouches[0];
+        touchStart = { x: touch.clientX, y: touch.clientY };
+        pausedUntil = Date.now() + 12000;
+      }, { passive: true });
+      viewport.addEventListener("touchend", (event) => {
+        if (!touchStart) return;
+        const touch = event.changedTouches[0];
+        const dx = touch.clientX - touchStart.x;
+        const dy = touch.clientY - touchStart.y;
+        if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy) * 1.2) advance(dx < 0 ? 1 : -1);
+        touchStart = null;
+      }, { passive: true });
+      track.style.transition = "none";
+      position();
+      update(false);
+      requestAnimationFrame(() => { track.style.transition = ""; });
+      window.addEventListener("resize", () => {
+        track.style.transition = "none";
+        position();
+        if (moving) settle();
+        else requestAnimationFrame(() => { track.style.transition = ""; });
+      });
+      reducedMotion.addEventListener("change", () => { if (reducedMotion.matches && moving) settle(); });
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((entries) => { visible = entries[0].isIntersecting; }, { threshold: .15 }).observe(showcase);
+      } else visible = true;
+      window.setInterval(() => {
+        if (visible && !document.hidden && !reducedMotion.matches && !hovered && !focused && Date.now() > pausedUntil) advance(1, false);
+      }, 7000);
+    }
+  }
+
   // Interfaz pública mínima para el asistente; el estado y precio siguen en el cotizador.
   window.TALLER_PUBLIC_ACTIONS = Object.freeze({
     selectProjectType,
