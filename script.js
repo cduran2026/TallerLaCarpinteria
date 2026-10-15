@@ -207,7 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
     send?.addEventListener("click", () => {
       calculate();
       if (!budget) return;
-      const projectLabel = budget.type === "kitchen" ? "Cocina a medida" : "Clóset / Walk-in closet";
+      const projectLabel = budget.type === "kitchen" ? "Cocina a medida" : "Clóset a medida";
       const appliances = [];
       if (budget.type === "kitchen") {
         if (checkedValue("fcModules", "ambos") !== "aereos" && q("#fc-sink")?.checked) appliances.push("lavaplatos");

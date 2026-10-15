@@ -58,7 +58,17 @@ const contrast = (foreground, background) => {
     assert.equal(await page.locator('.header-social a').count(), 2);
     assert.equal(await page.locator('.mobile-social a').count(), 2);
     assert.equal(await page.getByRole('button', { name: 'Cotizar un proyecto similar' }).count(), 3);
-    assert.equal(await page.getByRole('heading', { name: 'De tu idea a la instalación.' }).count(), 1);
+    assert.equal(await page.getByRole('heading', { name: 'Lo diseñamos contigo. Lo hacemos nosotros.' }).count(), 1);
+    assert.equal(await page.locator('.gallery-social').count(), 0);
+    assert.equal(await page.locator('#mobile-nav > :first-child').getAttribute('class'), 'mobile-social');
+    for (const social of ['instagram.com/tallerlacarpinteria/', 'facebook.com/tlc.santiago.2025']) {
+      const link = page.locator('.header-social a[href*="' + social + '"]');
+      assert.equal(await link.getAttribute('target'), '_blank');
+      assert.equal(await link.getAttribute('rel'), 'noopener noreferrer');
+      assert.match(await link.getAttribute('aria-label'), /Taller La Carpintería/);
+    }
+    await page.locator('.header-social a').first().focus();
+    assert.equal(await page.locator('.header-social a').first().evaluate(element => getComputedStyle(element).outlineStyle), 'solid');
     const labelColors = await page.evaluate(() => [
       ['#galeria .eyebrow', '.gallery-section'],
       ['#cotizador .eyebrow', '.configurator-section'],
@@ -119,6 +129,8 @@ const contrast = (foreground, background) => {
     for (const width of [1440, 1024, 768, 430, 390, 360]) {
       await page.setViewportSize({ width, height: 900 });
       assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), 'Scroll horizontal a ' + width + 'px');
+      assert.equal(await page.locator('.header-social a:visible').count(), width >= 430 ? 2 : 0);
+      if (width >= 430) assert.ok(await page.locator('.header-social a').first().evaluate(element => element.getBoundingClientRect().width >= 44 && element.getBoundingClientRect().height >= 44));
       if (width <= 430) {
         assert.equal(await page.locator('.mobile-quote-shortcut').isVisible(), true);
         assert.match(await page.locator('#mobile-quote-summary').innerText(), /Cocina/);
@@ -141,6 +153,7 @@ const contrast = (foreground, background) => {
     assert.equal(await page.locator('#mobile-nav').isVisible(), true);
     assert.equal(await page.locator('#mobile-nav a[href*="instagram.com"]').count(), 1);
     assert.equal(await page.locator('#mobile-nav a[href*="facebook.com"]').count(), 1);
+    assert.ok(await page.locator('.mobile-social a').first().evaluate(element => element.getBoundingClientRect().width >= 44 && element.getBoundingClientRect().height >= 44));
     assert.deepEqual(missing, [], 'Recursos locales faltantes');
     assert.deepEqual(errors, [], 'Errores JavaScript');
     const maestro = await page.request.get(origin + '/maestro/');
